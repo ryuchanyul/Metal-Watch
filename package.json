@@ -1,0 +1,14 @@
+{
+  "name": "metal-watch-local",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local MVP for raw material prices, yearly charts, and analysis sheet cost calculation.",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <rect width="900" height="1200" fill="#e9eef2"/>
+  <rect x="270" y="55" width="360" height="900" rx="34" fill="#101820"/>
+  <rect x="282" y="67" width="336" height="876" rx="26" fill="#f8fafb"/>
+
+  <text x="306" y="112" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#157a5b">Metal Watch</text>
+  <text x="306" y="144" font-family="Arial, sans-serif" font-size="28" font-weight="800" fill="#16202a">Cu(구리)</text>
+  <circle cx="583" cy="124" r="19" fill="#eef3f6"/>
+  <text x="583" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="800" fill="#275f9f">↻</text>
+
+  <rect x="306" y="170" width="288" height="112" rx="8" fill="#ffffff" stroke="#dce4ea"/>
+  <text x="324" y="199" font-family="Arial, sans-serif" font-size="13" font-weight="800" fill="#71808f">현재가</text>
+  <text x="324" y="239" font-family="Arial, sans-serif" font-size="36" font-weight="800" fill="#16202a">$13.4100</text>
+  <text x="324" y="263" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="#157a5b">₩20,220 · 월평균 대비 +4.02%</text>
+
+  <text x="306" y="322" font-family="Arial, sans-serif" font-size="17" font-weight="800" fill="#16202a">연간 차트</text>
+  <text x="594" y="322" text-anchor="end" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#71808f">최근 12개월</text>
+
+  <rect x="306" y="342" width="42" height="30" rx="15" fill="#ffffff" stroke="#dce4ea"/>
+  <text x="327" y="362" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="900" fill="#71808f">1M</text>
+  <rect x="356" y="342" width="42" height="30" rx="15" fill="#ffffff" stroke="#dce4ea"/>
+  <text x="377" y="362" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="900" fill="#71808f">3M</text>
+  <rect x="406" y="342" width="42" height="30" rx="15" fill="#dff3eb" stroke="#157a5b"/>
+  <text x="427" y="362" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="900" fill="#157a5b">1Y</text>
+
+  <rect x="306" y="386" width="288" height="220" rx="8" fill="#ffffff" stroke="#dce4ea"/>
+  <line x1="326" y1="430" x2="574" y2="430" stroke="#e7edf1"/>
+  <line x1="326" y1="480" x2="574" y2="480" stroke="#e7edf1"/>
+  <line x1="326" y1="530" x2="574" y2="530" stroke="#e7edf1"/>
+  <line x1="326" y1="495" x2="574" y2="495" stroke="#c8a91b" stroke-dasharray="5 5"/>
+  <path d="M326 548L349 538L371 552L394 514L416 522L439 494L461 500L484 472L506 476L529 446L551 438L574 424L574 586L326 586Z" fill="#157a5b" opacity="0.12"/>
+  <path d="M326 548L349 538L371 552L394 514L416 522L439 494L461 500L484 472L506 476L529 446L551 438L574 424" fill="none" stroke="#157a5b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="574" cy="424" r="5" fill="#157a5b" stroke="#ffffff" stroke-width="3"/>
+  <text x="326" y="590" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#71808f">6월</text>
+  <text x="443" y="590" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#71808f">12월</text>
+  <text x="552" y="590" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#71808f">5월</text>
+  <text x="548" y="416" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#157a5b">$13.41</text>
+
+  <rect x="306" y="620" width="88" height="64" rx="8" fill="#f2f6f8"/>
+  <text x="350" y="646" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="800" fill="#71808f">연고점</text>
+  <text x="350" y="668" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="#16202a">$13.41</text>
+  <rect x="406" y="620" width="88" height="64" rx="8" fill="#f2f6f8"/>
+  <text x="450" y="646" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="800" fill="#71808f">연저점</text>
+  <text x="450" y="668" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="#16202a">$10.82</text>
+  <rect x="506" y="620" width="88" height="64" rx="8" fill="#f2f6f8"/>
+  <text x="550" y="646" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="800" fill="#71808f">연평균</text>
+  <text x="550" y="668" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="#16202a">$12.18</text>
+
+  <rect x="306" y="704" width="288" height="116" rx="8" fill="#ffffff" stroke="#dce4ea"/>
+  <text x="324" y="735" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#71808f">데이터 소스</text>
+  <text x="574" y="735" text-anchor="end" font-family="Arial, sans-serif" font-size="13" font-weight="800" fill="#16202a">LME / 커스텀 API</text>
+  <line x1="324" y1="752" x2="576" y2="752" stroke="#dce4ea"/>
+  <text x="324" y="779" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#71808f">수집 주기</text>
+  <text x="574" y="779" text-anchor="end" font-family="Arial, sans-serif" font-size="13" font-weight="800" fill="#16202a">1시간</text>
+  <line x1="324" y1="796" x2="576" y2="796" stroke="#dce4ea"/>
+  <text x="324" y="809" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#71808f">단위</text>
+  <text x="574" y="809" text-anchor="end" font-family="Arial, sans-serif" font-size="13" font-weight="800" fill="#16202a">USD/kg</text>
+
+  <rect x="282" y="870" width="336" height="73" fill="#ffffff"/>
+  <line x1="282" y1="870" x2="618" y2="870" stroke="#dce4ea"/>
+  <text x="324" y="914" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#71808f">홈</text>
+  <text x="408" y="914" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#157a5b">시세</text>
+  <text x="492" y="914" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#71808f">알림</text>
+  <text x="576" y="914" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="800" fill="#71808f">설정</text>
+
+  <text x="450" y="1040" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="800" fill="#16202a">특정 상품 상세 화면 + 연간 차트</text>
+  <text x="450" y="1078" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#71808f">1M / 3M / 1Y 전환, 연고점·연저점·연평균 요약 포함</text>
+</svg>

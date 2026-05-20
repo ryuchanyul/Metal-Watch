@@ -1,0 +1,48 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# 환경변수 / 비밀키 (Supabase, OCR API 등 들어올 자리)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# 빌드 산출물
+dist/
+build/
+.next/
+.vercel/
+out/
+
+# 로그
+logs/
+*.log
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# 에디터 / IDE
+.vscode/
+!.vscode/settings.json.example
+.idea/
+*.swp
+*.swo
+*~
+
+# 임시 / 캐시
+.cache/
+.tmp/
+tmp/
+
+# 분석표 업로드 샘플 (실데이터 유출 방지)
+uploads/
+samples/private/

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Metal Watch</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="주요 메뉴">
+        <div class="brand">
+          <span class="brand-mark">MW</span>
+          <div>
+            <strong>Metal Watch</strong>
+            <small>원자재 시세 · 분석표 자동정리</small>
+          </div>
+        </div>
+        <nav class="side-nav">
+          <button class="active" data-view="dashboard">대시보드</button>
+          <button data-view="prices">시세표</button>
+          <button data-view="detail">상세 차트</button>
+          <button data-view="analysis">분석표</button>
+          <button data-view="settings">설정</button>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Local MVP</p>
+            <h1 id="pageTitle">대시보드</h1>
+          </div>
+          <div class="update-badge">
+            <span>최종 업데이트</span>
+            <strong id="updatedAt">-</strong>
+          </div>
+        </header>
+
+        <section class="view active" id="dashboard">
+          <div class="metric-grid">
+            <article class="metric-card dark">
+              <span>USD/KRW</span>
+              <strong id="exchangeRate">-</strong>
+              <p>1시간 단위 수집 기준</p>
+            </article>
+            <article class="metric-card">
+              <span>상승 TOP</span>
+              <strong id="topGain">-</strong>
+              <p>월평균 대비</p>
+            </article>
+            <article class="metric-card">
+              <span>하락 TOP</span>
+              <strong id="topLoss">-</strong>
+              <p>월평균 대비</p>
+            </article>
+          </div>
+
+          <div class="section-heading">
+            <h2>관심 원자재</h2>
+            <button class="text-button" data-view-shortcut="prices">전체 보기</button>
+          </div>
+          <div class="commodity-grid" id="commodityCards"></div>
+        </section>
+
+        <section class="view" id="prices">
+          <div class="section-heading">
+            <h2>원자재 시세표</h2>
+            <div class="table-tools">
+              <input id="priceSearch" type="search" placeholder="원자재 검색" />
+              <button id="refreshPrices">시세 갱신</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>구분</th>
+                  <th>현재 USD</th>
+                  <th>월평균 USD</th>
+                  <th>현재 KRW</th>
+                  <th>월평균 KRW</th>
+                  <th>변화율</th>
+                </tr>
+              </thead>
+              <tbody id="priceRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view" id="detail">
+          <div class="detail-layout">
+            <article class="panel">
+              <label class="field">
+                원자재 선택
+                <select id="commoditySelect"></select>
+              </label>
+              <div class="detail-price">
+                <span id="detailName">-</span>
+                <strong id="detailUsd">-</strong>
+                <p id="detailKrw">-</p>
+              </div>
+              <div class="stat-row">
+                <p><span>연고점</span><strong id="yearHigh">-</strong></p>
+                <p><span>연저점</span><strong id="yearLow">-</strong></p>
+                <p><span>연평균</span><strong id="yearAvg">-</strong></p>
+              </div>
+            </article>
+
+            <article class="panel chart-panel">
+              <div class="section-heading compact">
+                <h2>연간 차트</h2>
+                <div class="period-tabs">
+                  <button data-period="1M">1M</button>
+                  <button data-period="3M">3M</button>
+                  <button class="active" data-period="1Y">1Y</button>
+                </div>
+              </div>
+              <div class="chart-box">
+                <svg id="yearChart" class="year-chart" viewBox="0 0 760 320" role="img" aria-label="연간 가격 차트"></svg>
+                <div id="chartTooltip" class="chart-tooltip" hidden></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="analysis">
+          <div class="analysis-layout">
+            <article class="panel upload-panel">
+              <div class="section-heading compact">
+                <h2>분석표 촬영/업로드</h2>
+                <span class="hint">OCR 연동 전 데모</span>
+              </div>
+              <label class="upload-box" for="analysisFile">
+                <span>분석표 이미지/PDF/엑셀 선택</span>
+                <strong id="fileLabel">파일을 선택하거나 촬영하세요</strong>
+                <input id="analysisFile" type="file" accept="image/*,.pdf,.xlsx,.xls,.csv" />
+              </label>
+              <button id="runAnalysis" class="primary-action">분석표 자동정리 실행</button>
+              <p class="small-note">현재 버전은 샘플 분석표를 기준으로 항목 매칭과 비용 계산 흐름을 보여줍니다.</p>
+            </article>
+
+            <article class="panel total-panel">
+              <span>예상 총 비용</span>
+              <strong id="analysisTotal">-</strong>
+              <p id="analysisSummary">분석을 실행하면 결과가 표시됩니다.</p>
+            </article>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>항목</th>
+                  <th>인식명</th>
+                  <th>함량</th>
+                  <th>중량</th>
+                  <th>적용 단가</th>
+                  <th>금액</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody id="analysisRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view" id="settings">
+          <div class="settings-grid">
+            <article class="panel">
+              <div class="section-heading compact">
+                <h2>원자재 추가</h2>
+              </div>
+              <form id="addCommodityForm" class="form-grid">
+                <label class="field">
+                  표시명
+                  <input id="newName" required placeholder="예: Ag(은)" />
+                </label>
+                <label class="field">
+                  심볼
+                  <input id="newSymbol" required placeholder="예: Ag" />
+                </label>
+                <label class="field">
+                  현재 USD
+                  <input id="newUsd" required type="number" step="0.0001" placeholder="예: 31.2" />
+                </label>
+                <label class="field">
+                  월평균 USD
+                  <input id="newAvg" required type="number" step="0.0001" placeholder="예: 30.5" />
+                </label>
+                <button class="primary-action" type="submit">원자재 추가</button>
+              </form>
+            </article>
+
+            <article class="panel">
+              <div class="section-heading compact">
+                <h2>향후 연결 정보</h2>
+              </div>
+              <ul class="roadmap-list">
+                <li>GitHub 저장소에 코드 저장</li>
+                <li>Vercel에 프론트엔드 배포</li>
+                <li>Supabase PostgreSQL에 시세/분석 결과 저장</li>
+                <li>Supabase Storage에 분석표 파일 저장</li>
+                <li>OCR API 연결 후 실제 분석표 자동 인식</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
