@@ -96,5 +96,9 @@ supabase/migrations/      # SQL 마이그레이션
 
 ## 데이터 출처
 
-- **Cu, Al, Ni, Sn, Co, Li, Mn**: Trading Economics (매시간) + 네이버 Finance (Cu/Al/Ni/Sn 1년 백필)
-- **W (텅스텐)**: 자료 출처 미정 — 추후 추가
+화면에 보이는 모든 가격은 **KOMIS (한국광해광업공단)** 의 일간 시세를 사용한다.
+- 11종목 (Co, Li, Ni, Mn, Cu, Al, Sn, Pb, Zn, W_WC, W_WO3)
+- 2024-01-02부터의 일별 데이터
+- spec/단위 매핑 + 다운로드/적재 흐름: [`docs/data-sources.md`](docs/data-sources.md)
+
+매시간 자동 수집 (Trading Economics)은 백업/이력용으로 Supabase에 누적되지만 화면에는 미노출.
