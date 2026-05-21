@@ -17,6 +17,26 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 }
 
 const CHUNK_SIZE = 500;
+const BACKFILL_SOURCE = "Naver Finance (backfill)";
+
+// 재실행 멱등성: 이전 백필 데이터를 먼저 삭제한다.
+// source 컬럼 정확히 일치하는 행만 삭제 — 일반 수집 데이터(Trading Economics)는 영향 없음.
+async function clearPreviousBackfill() {
+  const url = `${SUPABASE_URL}/rest/v1/price_snapshots?source=eq.${encodeURIComponent(BACKFILL_SOURCE)}`;
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      apikey: SUPABASE_SERVICE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
+      Prefer: "return=minimal"
+    }
+  });
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(`기존 백필 삭제 실패: ${res.status} ${detail}`);
+  }
+  console.log(`[정리] 기존 backfill source 행 삭제 완료`);
+}
 
 async function insertChunk(rows) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/price_snapshots`, {
@@ -40,6 +60,8 @@ async function main() {
   console.log(`[백필 시작] ${new Date().toISOString()}`);
   console.log(`[대상] ${Object.keys(NAVER_LME_MAP).length}개 LME 금속`);
 
+  await clearPreviousBackfill();
+
   const history = await fetchAllNaverHistory();
 
   const allRows = [];
@@ -50,7 +72,7 @@ async function main() {
         usd_per_kg: Number((price / 1000).toFixed(4)), // USD/T → USD/kg
         raw_value: price,
         raw_unit: "USD/T",
-        source: "Naver Finance (backfill)",
+        source: BACKFILL_SOURCE,
         collected_at: new Date(date + "T00:00:00Z").toISOString()
       });
     }
