@@ -694,42 +694,42 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
-  /* 50+ 사용자 가독성: 모바일 전반 폰트 상향 */
-  .side-nav button { font-size: 15px; }
+  /* 50+ 사용자 가독성: 모바일 전반 폰트 상향 (2단계 적용) */
+  .side-nav button { font-size: 17px; }
 
-  .metric-card span { font-size: 15px; }
-  .metric-card span em { font-size: 13px; }
-  .metric-card strong { font-size: 30px; }
+  .metric-card span { font-size: 17px; }
+  .metric-card span em { font-size: 15px; }
+  .metric-card strong { font-size: 34px; }
 
-  .update-badge span { font-size: 14px; }
-  .update-badge span em { font-size: 13px; }
-  .update-badge strong { font-size: 18px; }
+  .update-badge span { font-size: 16px; }
+  .update-badge span em { font-size: 15px; }
+  .update-badge strong { font-size: 20px; }
 
-  .commodity-card strong { font-size: 17px; }
-  .commodity-card small { font-size: 14px; }
-  .price-stack strong { font-size: 19px; }
-  .price-stack span { font-size: 14px; }
-  .change { font-size: 13px; }
+  .commodity-card strong { font-size: 19px; }
+  .commodity-card small { font-size: 16px; }
+  .price-stack strong { font-size: 22px; }
+  .price-stack span { font-size: 16px; }
+  .change { font-size: 15px; }
 
-  h2 { font-size: 20px; }
+  h2 { font-size: 22px; }
 
-  table { font-size: 15px; }
-  th { font-size: 14px; }
-  td small { font-size: 14px; }
+  table { font-size: 17px; }
+  th { font-size: 16px; }
+  td small { font-size: 16px; }
 
   input,
-  select { font-size: 16px; }
+  select { font-size: 17px; }
 
   .primary-action,
   .text-button,
   .table-tools button,
-  .period-tabs button { font-size: 14px; }
+  .period-tabs button { font-size: 16px; }
 
   .small-note,
-  .hint { font-size: 13px; }
+  .hint { font-size: 15px; }
 
   .detail-price span,
-  .total-panel span { font-size: 14px; }
+  .total-panel span { font-size: 16px; }
 }
 
 @media (max-width: 620px) {
