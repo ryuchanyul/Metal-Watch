@@ -24,8 +24,8 @@ const TARGETS = [
   { category: "MinorMetals", korean: "리튬",   symbol: "li" },
   { category: "MinorMetals", korean: "코발트", symbol: "co" },
   { category: "MinorMetals", korean: "망간",   symbol: "mn" },
-  { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "WC",  symbol: "w_wc" },
-  { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "WO3", symbol: "w_wo3" }
+  { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "Carbide", symbol: "w_wc" },
+  { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "Oxide",   symbol: "w_wo3" }
 ];
 
 const CATEGORY_URL = {
