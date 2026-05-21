@@ -17,76 +17,106 @@ const formatter = {
 let exchangeRate = 1507.82;
 let selectedPeriod = "1Y";
 
+// 종목 메타데이터. usd / monthlyAvg는 loadLivePrices()가 API에서 덮어씀.
 let commodities = [
   {
     symbol: "Co",
     name: "Co(코발트)",
-    spec: "99.8% Min",
-    usd: 56.25,
-    monthlyAvg: 55.99,
+    spec: "99.8%min In warehouse Rotterdam",
+    usd: 0,
+    monthlyAvg: 0,
     unit: "USD/kg",
-    source: "Fastmarkets",
-    yearly: [48.3, 49.1, 51.8, 50.6, 53.2, 54.4, 52.8, 55.1, 56.0, 54.9, 55.7, 56.25]
+    source: "KOMIS"
   },
   {
     symbol: "Li",
     name: "Li(리튬)",
-    spec: "Li2CO3 Lithium Carbonate",
-    usd: 22.64,
-    monthlyAvg: 19.78,
+    spec: "Li2CO3 99.5%min CIF China",
+    usd: 0,
+    monthlyAvg: 0,
     unit: "USD/kg",
-    source: "Fastmarkets",
-    yearly: [17.8, 18.1, 18.9, 19.4, 18.7, 20.2, 21.1, 20.5, 21.8, 22.0, 22.4, 22.64]
+    source: "KOMIS"
   },
   {
     symbol: "Ni",
     name: "Ni(니켈)",
-    spec: "LME Nickel",
-    usd: 18.8,
-    monthlyAvg: 18.00575,
+    spec: "LME CASH",
+    usd: 0,
+    monthlyAvg: 0,
     unit: "USD/kg",
-    source: "LME",
-    yearly: [17.4, 17.1, 16.9, 17.6, 18.2, 18.0, 18.4, 17.8, 18.6, 18.9, 18.3, 18.8]
+    source: "KOMIS"
   },
   {
     symbol: "Mn",
     name: "Mn(망간)",
-    spec: "Ferro 75% Min",
-    usd: 1.10648,
-    monthlyAvg: 1.13042,
+    spec: "Mn 75%min, C 2%max EXW China",
+    usd: 0,
+    monthlyAvg: 0,
     unit: "USD/kg",
-    source: "Custom API",
-    yearly: [1.2, 1.18, 1.16, 1.15, 1.12, 1.14, 1.13, 1.11, 1.1, 1.12, 1.09, 1.10648]
+    source: "KOMIS"
   },
   {
     symbol: "Cu",
     name: "Cu(구리)",
-    spec: "LME Copper",
-    usd: 13.41,
-    monthlyAvg: 12.89138,
+    spec: "LME CASH",
+    usd: 0,
+    monthlyAvg: 0,
     unit: "USD/kg",
-    source: "LME",
-    yearly: [10.82, 11.05, 10.9, 11.7, 11.55, 12.0, 12.18, 12.42, 12.34, 12.88, 13.05, 13.41]
+    source: "KOMIS"
   },
   {
     symbol: "Al",
     name: "Al(알루미늄)",
-    spec: "LME Aluminium",
-    usd: 3.665,
-    monthlyAvg: 3.60063,
+    spec: "LME CASH",
+    usd: 0,
+    monthlyAvg: 0,
     unit: "USD/kg",
-    source: "LME",
-    yearly: [3.2, 3.18, 3.23, 3.31, 3.4, 3.48, 3.51, 3.44, 3.58, 3.6, 3.62, 3.665]
+    source: "KOMIS"
   },
   {
     symbol: "Sn",
     name: "Sn(주석)",
-    spec: "LME Tin",
-    usd: 52.8,
-    monthlyAvg: 48.94175,
+    spec: "LME CASH",
+    usd: 0,
+    monthlyAvg: 0,
     unit: "USD/kg",
-    source: "LME",
-    yearly: [45.2, 44.8, 46.0, 47.5, 46.8, 49.1, 50.2, 48.9, 51.0, 52.4, 51.8, 52.8]
+    source: "KOMIS"
+  },
+  {
+    symbol: "Pb",
+    name: "Pb(납)",
+    spec: "LME CASH",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
+  },
+  {
+    symbol: "Zn",
+    name: "Zn(아연)",
+    spec: "LME CASH",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
+  },
+  {
+    symbol: "W_WC",
+    name: "W(텅스텐 WC)",
+    spec: "99.8%min 2.5-7.0μm FOB China",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
+  },
+  {
+    symbol: "W_WO3",
+    name: "W(텅스텐 WO3)",
+    spec: "99.95%min EXW China",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
   }
 ];
 
@@ -131,6 +161,7 @@ const els = {
 };
 
 function changePercent(item) {
+  if (!item.monthlyAvg || !Number.isFinite(item.monthlyAvg)) return 0;
   return ((item.usd - item.monthlyAvg) / item.monthlyAvg) * 100;
 }
 
@@ -502,6 +533,7 @@ async function loadLivePrices({ forceRefresh = false } = {}) {
         return {
           ...item,
           usd: live.usd,
+          monthlyAvg: live.monthlyAvg ?? item.monthlyAvg,
           source: live.source,
           isLive: true,
           manual: false

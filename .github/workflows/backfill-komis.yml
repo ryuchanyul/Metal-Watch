@@ -1,13 +1,13 @@
-name: Backfill cobalt (manual estimate)
+name: Backfill all KOMIS data
 
-# 1회성 백필. cron 없음, 수동 트리거만.
+# KOMIS 11종목 일괄 백필 + 기존 manual/KOMIS 데이터 정리.
 on:
   workflow_dispatch:
 
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,8 +17,8 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Backfill cobalt (manual chart estimate)
+      - name: Backfill all KOMIS symbols
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: node scripts/backfill-cobalt-manual.js
+        run: node scripts/backfill-all-komis.js
