@@ -11,7 +11,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const DOWNLOAD_DIR = join(here, "..", "tmp", "komis");
 
 // 한글 종목명 → 출력 파일명(영문 심볼)
-// KOMIS는 텅스텐을 단일 옵션으로만 제공 → WC/WO3 둘 다 같은 데이터로 저장
+// 텅스텐은 광종 선택 후 가격기준(srchPrcCrtr)에서 WC/WO3를 구분.
 const TARGETS = [
   // 비철금속 (BaseMetals 페이지)
   { category: "BaseMetals", korean: "동",       symbol: "cu" },
@@ -24,8 +24,8 @@ const TARGETS = [
   { category: "MinorMetals", korean: "리튬",   symbol: "li" },
   { category: "MinorMetals", korean: "코발트", symbol: "co" },
   { category: "MinorMetals", korean: "망간",   symbol: "mn" },
-  { category: "MinorMetals", korean: "텅스텐", symbol: "w_wc" },
-  { category: "MinorMetals", korean: "텅스텐", symbol: "w_wo3" }
+  { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "WC",  symbol: "w_wc" },
+  { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "WO3", symbol: "w_wo3" }
 ];
 
 const CATEGORY_URL = {
@@ -42,16 +42,20 @@ async function setupDir() {
   await mkdir(DOWNLOAD_DIR, { recursive: true });
 }
 
-// 페이지에서 광종 코드 옵션 목록 추출
-async function getMineralOptions(page) {
-  return page.evaluate(() => {
-    const sel = document.querySelector("#srchMnrkndUnqCd");
-    if (!sel) return [];
-    return Array.from(sel.options).map((o) => ({
+// 페이지에서 select 옵션 목록 추출 (제네릭)
+async function getSelectOptions(page, selector) {
+  return page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return [];
+    return Array.from(el.options).map((o) => ({
       value: o.value,
       text: (o.textContent || "").trim()
     }));
-  });
+  }, selector);
+}
+
+async function getMineralOptions(page) {
+  return getSelectOptions(page, "#srchMnrkndUnqCd");
 }
 
 async function downloadOne(page, target) {
@@ -79,6 +83,31 @@ async function downloadOne(page, target) {
 
   console.log(`[${target.symbol}] 광종 선택: ${match.text} (${match.value})`);
   await page.selectOption("#srchMnrkndUnqCd", match.value);
+
+  // 가격기준 select가 동적으로 갱신될 시간 대기 (change 이벤트 → AJAX)
+  await page.waitForTimeout(800);
+
+  // 가격기준 선택이 필요한 종목 처리
+  if (target.prcCrtrKeyword) {
+    const prcOptions = await getSelectOptions(page, "#srchPrcCrtr");
+    console.log(
+      `[${target.symbol}] 가격기준 옵션: ${prcOptions.map((o) => o.text).join(" | ")}`
+    );
+    const keyword = target.prcCrtrKeyword.toUpperCase();
+    const prcMatch = prcOptions.find((o) =>
+      o.text.toUpperCase().includes(keyword)
+    );
+    if (!prcMatch) {
+      throw new Error(
+        `가격기준 '${target.prcCrtrKeyword}' 못 찾음. 옵션: ${prcOptions.map((o) => o.text).join(", ")}`
+      );
+    }
+    console.log(
+      `[${target.symbol}] 가격기준 선택: ${prcMatch.text} (${prcMatch.value})`
+    );
+    await page.selectOption("#srchPrcCrtr", prcMatch.value);
+    await page.waitForTimeout(300);
+  }
 
   // 검색 버튼 클릭
   await page.click('button:has-text("검색"), a:has-text("검색"), [onclick*="onSearch"]');
