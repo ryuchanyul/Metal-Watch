@@ -98,16 +98,7 @@ const sampleAnalysis = [
   { symbol: "Al", recognized: "Aluminium", content: "6.1%", weightKg: 140, confidence: 0.89 }
 ];
 
-const viewTitles = {
-  dashboard: "대시보드",
-  prices: "시세표",
-  detail: "상세 차트",
-  analysis: "분석표 자동정리",
-  settings: "설정"
-};
-
 const els = {
-  pageTitle: document.querySelector("#pageTitle"),
   updatedAt: document.querySelector("#updatedAt"),
   exchangeRate: document.querySelector("#exchangeRate"),
   topGain: document.querySelector("#topGain"),
@@ -445,7 +436,6 @@ function setView(viewName) {
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.classList.toggle("active", button.dataset.view === viewName);
   });
-  els.pageTitle.textContent = viewTitles[viewName] || "Metal Watch";
 }
 
 async function loadLivePrices({ forceRefresh = false } = {}) {
