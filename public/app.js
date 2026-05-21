@@ -243,21 +243,65 @@ function renderCommoditySelect() {
   els.commoditySelect.value = "Cu";
 }
 
-function renderDetail() {
-  const selected = commodities.find((item) => item.symbol === els.commoditySelect.value) || commodities[0];
-  const chartData = buildPeriodData(selected, selectedPeriod);
+// 종목별 history 캐시 (같은 symbol 두 번 fetch 안 함)
+const historyCache = new Map();
+
+async function fetchHistory(symbol) {
+  if (historyCache.has(symbol)) return historyCache.get(symbol);
+  try {
+    const res = await fetch(`/api/history?symbol=${encodeURIComponent(symbol)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const rows = Array.isArray(data.rows) ? data.rows : [];
+    historyCache.set(symbol, rows);
+    return rows;
+  } catch (error) {
+    console.warn(`history fetch 실패 (${symbol}):`, error);
+    return [];
+  }
+}
+
+async function renderDetail() {
+  const selected =
+    commodities.find((item) => item.symbol === els.commoditySelect.value) ||
+    commodities[0];
+
+  els.chartTitle.textContent = CHART_TITLE_MAP[selectedPeriod] || "차트";
+
+  const history = await fetchHistory(selected.symbol);
+  const chartData = buildPeriodData(history, selectedPeriod);
   const values = chartData.values;
-  const high = Math.max(...values);
-  const low = Math.min(...values);
-  const avg = values.reduce((sum, value) => sum + value, 0) / values.length;
 
   els.detailName.textContent = `${selected.name} · ${selected.unit} · ${selected.source}`;
   els.detailUsd.textContent = formatter.usd(selected.usd);
   els.detailKrw.textContent = `${formatter.krw(krwPrice(selected.usd))} · 월평균 대비 ${formatter.percent(changePercent(selected))}`;
+
+  if (values.length === 0) {
+    // 데이터 부족 상태 — 차트 비우고 안내
+    els.yearHigh.textContent = "-";
+    els.yearLow.textContent = "-";
+    els.yearAvg.textContent = "-";
+    els.chartTitle.textContent = `${CHART_TITLE_MAP[selectedPeriod]} · 데이터 부족`;
+    els.yearChart.innerHTML = `
+      <text x="380" y="160" text-anchor="middle" fill="#8492a0" font-size="14">
+        ${selected.symbol} ${selectedPeriod} 데이터 없음
+      </text>`;
+    return;
+  }
+
+  const high = Math.max(...values);
+  const low = Math.min(...values);
+  const avg = values.reduce((sum, value) => sum + value, 0) / values.length;
+
   els.yearHigh.textContent = formatter.usd(high);
   els.yearLow.textContent = formatter.usd(low);
   els.yearAvg.textContent = formatter.usd(avg);
-  els.chartTitle.textContent = CHART_TITLE_MAP[selectedPeriod] || "차트";
+
+  // 데이터 적을 때(예: 1M인데 5일치만) 제목에 알림
+  const expectedMin = selectedPeriod === "1M" ? 15 : selectedPeriod === "3M" ? 40 : 100;
+  if (values.length < expectedMin) {
+    els.chartTitle.textContent = `${CHART_TITLE_MAP[selectedPeriod]} · ${values.length}개 데이터만`;
+  }
 
   drawYearChart(chartData, avg);
 }
@@ -276,46 +320,23 @@ function monthLabel(monthsAgo) {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-function buildPeriodData(item, period) {
-  if (period === "1M") {
-    const start = item.yearly[item.yearly.length - 2];
-    const end = item.usd;
-    const values = Array.from({ length: 30 }, (_, index) => {
-      const progress = index / 29;
-      const wave = Math.sin(index * 0.9) * end * 0.006;
-      return Number((start + (end - start) * progress + wave).toFixed(5));
-    });
+// Supabase에서 받은 history 배열을 기간으로 잘라 차트 데이터로 변환.
+// history: [{ usd_per_kg, collected_at }, ...] 시간순 오름차순
+function buildPeriodData(history, period) {
+  const daysBack = period === "1M" ? 30 : period === "3M" ? 90 : 365;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - daysBack);
 
-    return {
-      period,
-      values,
-      labels: [dateLabel(29), dateLabel(14), dateLabel(0)]
-    };
-  }
+  const filtered = history.filter((row) => new Date(row.collected_at) >= cutoff);
+  const values = filtered.map((row) => row.usd_per_kg);
+  const dates = filtered.map((row) => row.collected_at);
 
-  if (period === "3M") {
-    const base = item.yearly.slice(-4);
-    const values = Array.from({ length: 13 }, (_, index) => {
-      const segment = Math.min(Math.floor(index / 4), 2);
-      const local = (index % 4) / 4;
-      const start = base[segment];
-      const end = base[segment + 1];
-      const wave = Math.cos(index * 0.8) * end * 0.004;
-      return Number((start + (end - start) * local + wave).toFixed(5));
-    });
+  const labels =
+    period === "1Y"
+      ? [monthLabel(11), monthLabel(6), monthLabel(0)]
+      : [dateLabel(daysBack - 1), dateLabel(Math.floor(daysBack / 2)), dateLabel(0)];
 
-    return {
-      period,
-      values,
-      labels: [dateLabel(89), dateLabel(44), dateLabel(0)]
-    };
-  }
-
-  return {
-    period,
-    values: item.yearly,
-    labels: [monthLabel(11), monthLabel(6), monthLabel(0)]
-  };
+  return { period, values, dates, labels };
 }
 
 const CHART_TITLE_MAP = {
@@ -337,8 +358,12 @@ function drawYearChart(chartData, average) {
   const months = buildPointLabels(chartData);
 
   const point = (value, index) => {
-    const x = padding.left + (chartWidth / (values.length - 1)) * index;
-    const y = padding.top + chartHeight - ((value - min) / (max - min)) * chartHeight;
+    // 데이터 1개일 때 division by zero 방지: 중앙에 표시
+    const x =
+      values.length > 1
+        ? padding.left + (chartWidth / (values.length - 1)) * index
+        : padding.left + chartWidth / 2;
+    const y = padding.top + chartHeight - ((value - min) / (max - min || 1)) * chartHeight;
     return [x, y];
   };
 
@@ -386,15 +411,15 @@ function drawYearChart(chartData, average) {
 }
 
 function buildPointLabels(chartData) {
-  if (chartData.period === "1M") {
-    return chartData.values.map((_, index) => `${index + 1}일`);
+  // history.dates 기반 — hover 툴팁에 실제 날짜 표시
+  if (Array.isArray(chartData.dates) && chartData.dates.length > 0) {
+    return chartData.dates.map((iso) => {
+      const d = new Date(iso);
+      return `${d.getMonth() + 1}/${d.getDate()}`;
+    });
   }
-
-  if (chartData.period === "3M") {
-    return chartData.values.map((_, index) => `${index + 1}주`);
-  }
-
-  return ["6월", "7월", "8월", "9월", "10월", "11월", "12월", "1월", "2월", "3월", "4월", "5월"];
+  // fallback (dates 없을 때)
+  return chartData.values.map((_, index) => `${index + 1}`);
 }
 
 function showChartTooltip(target) {
