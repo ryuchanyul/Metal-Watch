@@ -155,14 +155,25 @@ function updateTime() {
   }).format(new Date());
 }
 
+function renderTopChange(element, symbol, change) {
+  // textContent + createElement로 안전하게 마크업 구성 (innerHTML 사용 안 함)
+  while (element.firstChild) element.removeChild(element.firstChild);
+  element.append(document.createTextNode(`${symbol} `));
+  const span = document.createElement("span");
+  span.className = `change ${change >= 0 ? "up" : "down"}`;
+  span.textContent = formatter.percent(change);
+  element.append(span);
+}
+
 function renderDashboard() {
   const ranked = [...commodities].sort((a, b) => changePercent(b) - changePercent(a));
   const gain = ranked[0];
   const loss = ranked[ranked.length - 1];
 
   els.exchangeRate.textContent = formatter.krw(exchangeRate);
-  els.topGain.textContent = `${gain.symbol} ${formatter.percent(changePercent(gain))}`;
-  els.topLoss.textContent = `${loss.symbol} ${formatter.percent(changePercent(loss))}`;
+
+  renderTopChange(els.topGain, gain.symbol, changePercent(gain));
+  renderTopChange(els.topLoss, loss.symbol, changePercent(loss));
 
   els.commodityCards.innerHTML = commodities.slice(0, 6).map((item) => {
     const change = changePercent(item);
