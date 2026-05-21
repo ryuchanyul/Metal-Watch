@@ -216,7 +216,7 @@ function renderPriceTable() {
     const direction = change >= 0 ? "up" : "down";
     return `
       <tr class="clickable-row" data-symbol="${item.symbol}">
-        <td><strong>${item.symbol}</strong><br><small>${item.name} · ${item.spec}</small></td>
+        <td><strong>${item.name.replace("(", " (")}</strong><br><small>${item.spec}</small></td>
         <td>${formatter.usd(item.usd)}</td>
         <td class="avg-cell">${formatter.usd(item.monthlyAvg)}</td>
         <td>${formatter.krw(krwPrice(item.usd))}</td>
