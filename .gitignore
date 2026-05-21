@@ -43,6 +43,10 @@ Desktop.ini
 .tmp/
 tmp/
 
+# Playwright
+node_modules/
+playwright-report/
+
 # 분석표 업로드 샘플 (실데이터 유출 방지)
 uploads/
 samples/private/

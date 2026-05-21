@@ -30,29 +30,41 @@
 | 텅스텐 WC | `W_WC` | 99.8%min 2.5-7.0μm FOB China | USD/kg | 그대로 |
 | 텅스텐 WO3 | `W_WO3` | 99.95%min EXW China | USD/kg | 그대로 |
 
-## 다운로드 → 적재 흐름
+## 다운로드 → 적재 흐름 (자동)
 
 ```
-KOMIS 사이트 (수동)
-     │ 종목별 xlsx 다운로드 11개
+GitHub Actions cron (매일 00:00 UTC = KST 09:00)
+     │ scripts/download-komis.js
+     │   Playwright headless Chrome
      ▼
-~/Downloads/광물시세/ 폴더
-     │ Python으로 일괄 변환
+KOMIS 사이트 11개 종목 자동 다운로드
+     │ tmp/komis/{symbol}.xlsx
+     │ scripts/convert-komis-xlsx.py
      ▼
 scripts/data/{symbol}-komis.json (11개)
-     │ git commit + push
-     ▼
-GitHub Actions (수동 트리거)
-     │ scripts/backfill-all-komis.js 실행
+     │ git commit + push (자동)
+     │ scripts/backfill-all-komis.js
      ▼
 Supabase price_snapshots
      │ source = 'KOMIS (광해광업공단)'
      ▼
 Vercel /api/prices, /api/history
-     │ KOMIS source 필터링
+     │ KOMIS + Trading Economics 합쳐서 dedup
      ▼
 브라우저 화면
 ```
+
+### 수동 실행
+
+```bash
+gh workflow run komis-daily.yml --ref master
+```
+
+### 워크플로우 파일
+
+- `.github/workflows/komis-daily.yml` — Playwright + 변환 + 적재 (매일)
+- `.github/workflows/backfill-komis.yml` — 수동 백필 (필요 시)
+- `.github/workflows/collect.yml` — Trading Economics 매시간 (보조)
 
 ### 단계별 명령
 

@@ -7,9 +7,14 @@
   "scripts": {
     "dev": "vercel dev",
     "collect": "node scripts/collect.js",
-    "backfill:naver": "node scripts/backfill-naver.js"
+    "download:komis": "node scripts/download-komis.js",
+    "convert:komis": "python scripts/convert-komis-xlsx.py",
+    "backfill:komis": "node scripts/backfill-all-komis.js"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
   }
 }

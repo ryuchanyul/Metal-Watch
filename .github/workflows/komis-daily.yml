@@ -1,0 +1,67 @@
+name: Daily KOMIS auto-download
+
+# 매일 KST 09:00 (00:00 UTC) — KOMIS가 전일 가격을 발표한 직후
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          npm install playwright
+          npx playwright install --with-deps chromium
+          pip install openpyxl
+
+      - name: Download KOMIS xlsx via Playwright
+        run: node scripts/download-komis.js
+
+      - name: Convert xlsx → JSON
+        run: python scripts/convert-komis-xlsx.py
+
+      - name: Commit updated JSON
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/data/*-komis.json
+          if git diff --cached --quiet; then
+            echo "변경사항 없음 — 커밋 스킵"
+          else
+            git commit -m "data: daily KOMIS update ($(date -u +%Y-%m-%d))"
+            git push
+          fi
+
+      - name: Backfill to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node scripts/backfill-all-komis.js
+
+      - name: Upload artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: komis-debug
+          path: |
+            tmp/komis/
+          if-no-files-found: ignore
+          retention-days: 7
