@@ -693,6 +693,43 @@ tbody tr:hover {
   .settings-grid {
     grid-template-columns: 1fr;
   }
+
+  /* 50+ 사용자 가독성: 모바일 전반 폰트 상향 */
+  .side-nav button { font-size: 15px; }
+
+  .metric-card span { font-size: 15px; }
+  .metric-card span em { font-size: 13px; }
+  .metric-card strong { font-size: 30px; }
+
+  .update-badge span { font-size: 14px; }
+  .update-badge span em { font-size: 13px; }
+  .update-badge strong { font-size: 18px; }
+
+  .commodity-card strong { font-size: 17px; }
+  .commodity-card small { font-size: 14px; }
+  .price-stack strong { font-size: 19px; }
+  .price-stack span { font-size: 14px; }
+  .change { font-size: 13px; }
+
+  h2 { font-size: 20px; }
+
+  table { font-size: 15px; }
+  th { font-size: 14px; }
+  td small { font-size: 14px; }
+
+  input,
+  select { font-size: 16px; }
+
+  .primary-action,
+  .text-button,
+  .table-tools button,
+  .period-tabs button { font-size: 14px; }
+
+  .small-note,
+  .hint { font-size: 13px; }
+
+  .detail-price span,
+  .total-panel span { font-size: 14px; }
 }
 
 @media (max-width: 620px) {
