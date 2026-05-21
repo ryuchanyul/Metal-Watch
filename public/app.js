@@ -146,13 +146,25 @@ function krwPrice(usd) {
   return usd * exchangeRate;
 }
 
-function updateTime() {
+function updateTime(date = new Date()) {
   els.updatedAt.textContent = new Intl.DateTimeFormat("ko-KR", {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
     minute: "2-digit"
-  }).format(new Date());
+  }).format(date);
+}
+
+// API 응답의 prices.* 안의 collected_at 중 가장 최근값을 찾는다.
+function findLatestCollectedAt(data) {
+  const prices = data?.prices ?? {};
+  const timestamps = Object.values(prices)
+    .map((p) => p?.collected_at)
+    .filter(Boolean)
+    .map((t) => new Date(t).getTime())
+    .filter((n) => Number.isFinite(n));
+  if (timestamps.length === 0) return null;
+  return new Date(Math.max(...timestamps));
 }
 
 function renderTopChange(element, symbol, change) {
@@ -466,7 +478,9 @@ async function loadLivePrices({ forceRefresh = false } = {}) {
       };
     });
 
-    updateTime();
+    // 실제 수집 시각 표시 (없으면 fallback으로 현재 시각)
+    const collectedAt = findLatestCollectedAt(data);
+    updateTime(collectedAt || new Date());
     renderAll();
     return data;
   } catch (error) {
