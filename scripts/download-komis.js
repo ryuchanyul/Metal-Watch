@@ -11,6 +11,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const DOWNLOAD_DIR = join(here, "..", "tmp", "komis");
 
 // 한글 종목명 → 출력 파일명(영문 심볼)
+// KOMIS는 텅스텐을 단일 옵션으로만 제공 → WC/WO3 둘 다 같은 데이터로 저장
 const TARGETS = [
   // 비철금속 (BaseMetals 페이지)
   { category: "BaseMetals", korean: "동",       symbol: "cu" },
@@ -20,11 +21,11 @@ const TARGETS = [
   { category: "BaseMetals", korean: "아연",     symbol: "zn" },
   { category: "BaseMetals", korean: "주석",     symbol: "sn" },
   // 희소금속 (MinorMetals 페이지)
-  { category: "MinorMetals", korean: "리튬",     symbol: "li" },
-  { category: "MinorMetals", korean: "코발트",   symbol: "co" },
-  { category: "MinorMetals", korean: "망간",     symbol: "mn" },
-  { category: "MinorMetals", korean: "텅스텐_WC",  symbol: "w_wc" },
-  { category: "MinorMetals", korean: "텅스텐_WO3", symbol: "w_wo3" }
+  { category: "MinorMetals", korean: "리튬",   symbol: "li" },
+  { category: "MinorMetals", korean: "코발트", symbol: "co" },
+  { category: "MinorMetals", korean: "망간",   symbol: "mn" },
+  { category: "MinorMetals", korean: "텅스텐", symbol: "w_wc" },
+  { category: "MinorMetals", korean: "텅스텐", symbol: "w_wo3" }
 ];
 
 const CATEGORY_URL = {
@@ -65,7 +66,11 @@ async function downloadOne(page, target) {
   );
 
   const options = await getMineralOptions(page);
-  const match = options.find((o) => o.text.includes(target.korean));
+  // 매칭 우선순위: 정확한 일치 → 시작 일치 → 포함
+  // "연" 같은 짧은 한글이 "아연"과 충돌하는 문제 방지
+  let match =
+    options.find((o) => o.text.trim() === target.korean) ||
+    options.find((o) => o.text.trim().startsWith(target.korean));
   if (!match) {
     throw new Error(
       `광종 '${target.korean}' 찾을 수 없음. 옵션: ${options.map((o) => o.text).join(", ")}`
