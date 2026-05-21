@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import { fetchPricesFromSources } from "./lib/prices.js";
 
 const root = fileURLToPath(new URL(".", import.meta.url));
 const publicDir = join(root, "public");
@@ -31,8 +32,60 @@ const mimeTypes = {
   ".webmanifest": "application/manifest+json"
 };
 
+const CACHE_TTL_MS = 60 * 60 * 1000;
+let priceCache = { fetchedAt: 0, data: null };
+
+async function getCachedPrices({ forceRefresh = false } = {}) {
+  const now = Date.now();
+  const ageMs = now - priceCache.fetchedAt;
+
+  if (!forceRefresh && priceCache.data && ageMs < CACHE_TTL_MS) {
+    return { ...priceCache.data, cached: true, stale: false, ageMs };
+  }
+
+  try {
+    const data = await fetchPricesFromSources();
+    priceCache = { fetchedAt: now, data };
+    return { ...data, cached: false, stale: false, ageMs: 0 };
+  } catch (error) {
+    console.error("[prices] fetch 실패:", error.message);
+    if (priceCache.data) {
+      return {
+        ...priceCache.data,
+        cached: true,
+        stale: true,
+        error: error.message,
+        ageMs
+      };
+    }
+    throw error;
+  }
+}
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url || "/", `http://${req.headers.host}`);
+
+  if (url.pathname === "/api/prices") {
+    try {
+      const forceRefresh = url.searchParams.get("refresh") === "1";
+      const data = await getCachedPrices({ forceRefresh });
+      res.writeHead(200, {
+        "content-type": "application/json; charset=utf-8",
+        "cache-control": "no-store"
+      });
+      res.end(JSON.stringify(data));
+    } catch (error) {
+      res.writeHead(503, { "content-type": "application/json; charset=utf-8" });
+      res.end(
+        JSON.stringify({
+          error: "data source unavailable",
+          message: error.message
+        })
+      );
+    }
+    return;
+  }
+
   const pathname = url.pathname === "/" ? "/index.html" : url.pathname;
   const resolved = normalize(join(publicDir, pathname));
 

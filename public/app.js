@@ -435,14 +435,56 @@ function setView(viewName) {
   els.pageTitle.textContent = viewTitles[viewName] || "Metal Watch";
 }
 
-function simulateRefresh() {
-  exchangeRate = Number((exchangeRate + (Math.random() * 4 - 2)).toFixed(2));
-  commodities = commodities.map((item) => {
-    const move = item.usd * (Math.random() * 0.012 - 0.006);
-    return { ...item, usd: Number((item.usd + move).toFixed(5)) };
-  });
-  updateTime();
-  renderAll();
+async function loadLivePrices({ forceRefresh = false } = {}) {
+  try {
+    const path = forceRefresh ? "/api/prices?refresh=1" : "/api/prices";
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    if (data.exchangeRate?.USD_KRW) {
+      exchangeRate = data.exchangeRate.USD_KRW;
+    }
+
+    commodities = commodities.map((item) => {
+      const live = data.prices?.[item.symbol];
+      if (live && live.usd != null) {
+        return {
+          ...item,
+          usd: live.usd,
+          source: live.source,
+          isLive: true,
+          manual: false
+        };
+      }
+      return {
+        ...item,
+        isLive: false,
+        manual: Boolean(live?.manual),
+        source: live?.source || item.source
+      };
+    });
+
+    updateTime();
+    renderAll();
+    return data;
+  } catch (error) {
+    console.warn("실시간 시세 로딩 실패, 목업 데이터 유지:", error);
+    return null;
+  }
+}
+
+async function refreshPrices() {
+  const button = els.refreshPrices;
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = "갱신 중...";
+  try {
+    await loadLivePrices({ forceRefresh: true });
+  } finally {
+    button.disabled = false;
+    button.textContent = originalText;
+  }
 }
 
 function renderAll() {
@@ -461,7 +503,7 @@ document.querySelectorAll("[data-view-shortcut]").forEach((button) => {
 });
 
 els.priceSearch.addEventListener("input", renderPriceTable);
-els.refreshPrices.addEventListener("click", simulateRefresh);
+els.refreshPrices.addEventListener("click", refreshPrices);
 els.commoditySelect.addEventListener("change", renderDetail);
 
 document.querySelectorAll(".period-tabs button").forEach((button) => {
@@ -510,3 +552,4 @@ els.addCommodityForm.addEventListener("submit", (event) => {
 updateTime();
 renderAll();
 renderAnalysis();
+loadLivePrices();
