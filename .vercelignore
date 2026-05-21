@@ -1,0 +1,9 @@
+# Vercel 배포에서 제외할 경로.
+# 운영(웹앱)에는 public/ + api/ + lib/만 필요.
+
+scripts/
+supabase/
+.github/
+raw-material-price-app-plan.md
+.env.example
+server.js

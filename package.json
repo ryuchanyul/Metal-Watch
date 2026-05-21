@@ -1,12 +1,13 @@
 {
-  "name": "metal-watch-local",
-  "version": "0.1.0",
+  "name": "metal-watch",
+  "version": "0.2.0",
   "private": true,
-  "description": "Local MVP for raw material prices, yearly charts, and analysis sheet cost calculation.",
+  "description": "원자재 시세 + 분석표 자동정리 웹앱. Vercel 배포 + Supabase 저장 + GitHub Actions 수집.",
   "type": "module",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js"
+    "dev": "vercel dev",
+    "collect": "node scripts/collect.js",
+    "backfill:naver": "node scripts/backfill-naver.js"
   },
   "engines": {
     "node": ">=20"

@@ -87,16 +87,6 @@ let commodities = [
     unit: "USD/kg",
     source: "LME",
     yearly: [45.2, 44.8, 46.0, 47.5, 46.8, 49.1, 50.2, 48.9, 51.0, 52.4, 51.8, 52.8]
-  },
-  {
-    symbol: "W",
-    name: "W(텅스텐)",
-    spec: "WC Carbide 99.8% Min",
-    usd: 253.57,
-    monthlyAvg: 338.53,
-    unit: "USD/kg",
-    source: "Custom API",
-    yearly: [356, 348, 341, 338, 330, 318, 305, 294, 281, 270, 262, 253.57]
   }
 ];
 
