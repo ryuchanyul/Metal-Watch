@@ -401,6 +401,48 @@ tbody tr:hover {
   gap: 8px;
 }
 
+/* 원자재 선택 — 칩 그리드 (모바일 친화) */
+.commodity-picker-wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.picker-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.commodity-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.commodity-picker .chip {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  min-width: 44px;
+}
+
+.commodity-picker .chip:hover {
+  background: #f4f7fa;
+}
+
+.commodity-picker .chip.active {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
 .detail-price {
   margin-top: 22px;
 }
@@ -724,6 +766,9 @@ tbody tr:hover {
   .text-button,
   .table-tools button,
   .period-tabs button { font-size: 16px; }
+
+  .commodity-picker .chip { font-size: 16px; padding: 10px 16px; }
+  .picker-label { font-size: 14px; }
 
   .small-note,
   .hint { font-size: 15px; }

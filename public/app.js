@@ -137,7 +137,7 @@ const els = {
   priceRows: document.querySelector("#priceRows"),
   priceSearch: document.querySelector("#priceSearch"),
   refreshPrices: document.querySelector("#refreshPrices"),
-  commoditySelect: document.querySelector("#commoditySelect"),
+  commodityPicker: document.querySelector("#commodityPicker"),
   detailName: document.querySelector("#detailName"),
   detailUsd: document.querySelector("#detailUsd"),
   detailKrw: document.querySelector("#detailKrw"),
@@ -230,8 +230,7 @@ function renderDashboard() {
 
   document.querySelectorAll(".commodity-card").forEach((card) => {
     card.addEventListener("click", () => {
-      els.commoditySelect.value = card.dataset.symbol;
-      renderDetail();
+      selectCommodity(card.dataset.symbol);
       setView("detail");
     });
   });
@@ -260,18 +259,42 @@ function renderPriceTable() {
 
   document.querySelectorAll("#priceRows .clickable-row").forEach((row) => {
     row.addEventListener("click", () => {
-      els.commoditySelect.value = row.dataset.symbol;
-      renderDetail();
+      selectCommodity(row.dataset.symbol);
       setView("detail");
     });
   });
 }
 
+// 현재 선택된 종목 symbol (이전 select.value 대체)
+let selectedSymbol = "Cu";
+
 function renderCommoditySelect() {
-  els.commoditySelect.innerHTML = commodities.map((item) => {
-    return `<option value="${item.symbol}">${item.name} - ${item.spec}</option>`;
-  }).join("");
-  els.commoditySelect.value = "Cu";
+  // textContent + DOM API로 칩 생성 (innerHTML 미사용 — 보안 훅)
+  const picker = els.commodityPicker;
+  while (picker.firstChild) picker.removeChild(picker.firstChild);
+
+  for (const item of commodities) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chip" + (item.symbol === selectedSymbol ? " active" : "");
+    btn.dataset.symbol = item.symbol;
+    btn.setAttribute("role", "tab");
+    btn.setAttribute("aria-selected", item.symbol === selectedSymbol ? "true" : "false");
+    btn.textContent = item.symbol.replace("_", " ");
+    btn.addEventListener("click", () => selectCommodity(item.symbol));
+    picker.appendChild(btn);
+  }
+}
+
+function selectCommodity(symbol) {
+  selectedSymbol = symbol;
+  // 활성 칩 갱신
+  els.commodityPicker.querySelectorAll(".chip").forEach((b) => {
+    const isActive = b.dataset.symbol === symbol;
+    b.classList.toggle("active", isActive);
+    b.setAttribute("aria-selected", isActive ? "true" : "false");
+  });
+  renderDetail();
 }
 
 // 종목별 history 캐시 (같은 symbol 두 번 fetch 안 함)
@@ -294,7 +317,7 @@ async function fetchHistory(symbol) {
 
 async function renderDetail() {
   const selected =
-    commodities.find((item) => item.symbol === els.commoditySelect.value) ||
+    commodities.find((item) => item.symbol === selectedSymbol) ||
     commodities[0];
 
   els.chartTitle.textContent = CHART_TITLE_MAP[selectedPeriod] || "차트";
@@ -588,7 +611,6 @@ document.querySelectorAll("[data-view-shortcut]").forEach((button) => {
 
 els.priceSearch.addEventListener("input", renderPriceTable);
 els.refreshPrices.addEventListener("click", refreshPrices);
-els.commoditySelect.addEventListener("change", renderDetail);
 
 document.querySelectorAll(".period-tabs button").forEach((button) => {
   button.addEventListener("click", () => {
