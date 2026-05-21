@@ -115,6 +115,7 @@ const els = {
   yearLow: document.querySelector("#yearLow"),
   yearAvg: document.querySelector("#yearAvg"),
   yearChart: document.querySelector("#yearChart"),
+  chartTitle: document.querySelector("#chartTitle"),
   chartTooltip: document.querySelector("#chartTooltip"),
   analysisFile: document.querySelector("#analysisFile"),
   fileLabel: document.querySelector("#fileLabel"),
@@ -256,8 +257,23 @@ function renderDetail() {
   els.yearHigh.textContent = formatter.usd(high);
   els.yearLow.textContent = formatter.usd(low);
   els.yearAvg.textContent = formatter.usd(avg);
+  els.chartTitle.textContent = CHART_TITLE_MAP[selectedPeriod] || "차트";
 
   drawYearChart(chartData, avg);
+}
+
+// 오늘 기준 N일 전 날짜를 "M/D" 형식으로 반환
+function dateLabel(daysAgo) {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
+}
+
+// 오늘 기준 N개월 전 날짜를 "M/D" 형식으로 반환
+function monthLabel(monthsAgo) {
+  const d = new Date();
+  d.setMonth(d.getMonth() - monthsAgo);
+  return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
 function buildPeriodData(item, period) {
@@ -273,7 +289,7 @@ function buildPeriodData(item, period) {
     return {
       period,
       values,
-      labels: ["1일", "15일", "30일"]
+      labels: [dateLabel(29), dateLabel(14), dateLabel(0)]
     };
   }
 
@@ -291,16 +307,22 @@ function buildPeriodData(item, period) {
     return {
       period,
       values,
-      labels: ["3개월 전", "6주 전", "현재"]
+      labels: [dateLabel(89), dateLabel(44), dateLabel(0)]
     };
   }
 
   return {
     period,
     values: item.yearly,
-    labels: ["6월", "12월", "5월"]
+    labels: [monthLabel(11), monthLabel(6), monthLabel(0)]
   };
 }
+
+const CHART_TITLE_MAP = {
+  "1M": "월간 차트",
+  "3M": "분기 차트",
+  "1Y": "연간 차트"
+};
 
 function drawYearChart(chartData, average) {
   const values = chartData.values;
