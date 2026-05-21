@@ -155,6 +155,14 @@ h2 {
   padding: 11px 14px;
 }
 
+.update-badge span em {
+  margin-left: 4px;
+  color: var(--muted);
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .update-badge span,
 .metric-card span,
 .detail-price span,
