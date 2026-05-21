@@ -671,7 +671,15 @@ tbody tr:hover {
     padding: 20px;
   }
 
-  .metric-grid,
+  .metric-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* USD/KRW(dark) 카드는 모바일에서 첫 줄 풀폭 차지 */
+  .metric-grid .metric-card.dark {
+    grid-column: 1 / -1;
+  }
+
   .detail-layout,
   .analysis-layout,
   .settings-grid {
@@ -680,10 +688,15 @@ tbody tr:hover {
 }
 
 @media (max-width: 620px) {
-  .topbar,
-  .section-heading {
+  .topbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  /* 관심 원자재 · 전체 보기는 한 줄 유지 (공간 좁으면 wrap) */
+  .section-heading {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .update-badge {
