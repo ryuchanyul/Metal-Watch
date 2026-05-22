@@ -570,8 +570,11 @@ async function loadLivePrices({ forceRefresh = false } = {}) {
       };
     });
 
-    // 실제 수집 시각 표시 (없으면 fallback으로 현재 시각)
-    const collectedAt = findLatestCollectedAt(data);
+    // '최종 업데이트(수집시간)' = 시스템이 마지막으로 자동 수집한 시각
+    // API의 lastCollectionAt 우선, 폴백으로 종목별 collected_at 최대값
+    const collectedAt = data.lastCollectionAt
+      ? new Date(data.lastCollectionAt)
+      : findLatestCollectedAt(data);
     updateTime(collectedAt || new Date());
     renderAll();
     return data;
