@@ -17,6 +17,30 @@ const formatter = {
 let exchangeRate = 1507.82;
 let selectedPeriod = "1Y";
 
+// 전월(달력 기준) 번호. API의 prevMonth로 갱신됨. fallback은 클라이언트 계산.
+function defaultPrevMonth() {
+  const now = new Date();
+  const idx = now.getMonth() - 1; // -1~10
+  return idx < 0 ? 12 : idx + 1;
+}
+let prevMonth = defaultPrevMonth();
+
+// 화면 상의 "월평균" 라벨을 "N월평균"으로 일괄 갱신
+function updateMonthlyAvgLabels() {
+  const numText = `${prevMonth}월평균`;
+  if (els.prevMonthUsdHeader) els.prevMonthUsdHeader.textContent = `${numText} USD`;
+  if (els.prevMonthKrwHeader) els.prevMonthKrwHeader.textContent = `${numText} KRW`;
+  if (els.topGainLabel) els.topGainLabel.textContent = `(${numText} 대비)`;
+  if (els.topLossLabel) els.topLossLabel.textContent = `(${numText} 대비)`;
+  if (els.newAvgLabel) {
+    // 첫 텍스트 노드(라벨 텍스트)만 교체. <input>은 그대로.
+    const node = Array.from(els.newAvgLabel.childNodes).find(
+      (n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim()
+    );
+    if (node) node.textContent = `\n                  ${numText} USD\n                  `;
+  }
+}
+
 // 종목 메타데이터. usd / monthlyAvg는 loadLivePrices()가 API에서 덮어씀.
 let commodities = [
   {
@@ -147,6 +171,11 @@ const els = {
   yearChart: document.querySelector("#yearChart"),
   chartTitle: document.querySelector("#chartTitle"),
   chartTooltip: document.querySelector("#chartTooltip"),
+  prevMonthUsdHeader: document.querySelector("#prevMonthUsdHeader"),
+  prevMonthKrwHeader: document.querySelector("#prevMonthKrwHeader"),
+  topGainLabel: document.querySelector("#topGainLabel"),
+  topLossLabel: document.querySelector("#topLossLabel"),
+  newAvgLabel: document.querySelector("#newAvgLabel"),
   analysisFile: document.querySelector("#analysisFile"),
   fileLabel: document.querySelector("#fileLabel"),
   runAnalysis: document.querySelector("#runAnalysis"),
@@ -328,7 +357,7 @@ async function renderDetail() {
 
   els.detailName.textContent = `${selected.name} · ${selected.unit} · ${selected.source}`;
   els.detailUsd.textContent = formatter.usd(selected.usd);
-  els.detailKrw.textContent = `${formatter.krw(krwPrice(selected.usd))} · 월평균 대비 ${formatter.percent(changePercent(selected))}`;
+  els.detailKrw.textContent = `${formatter.krw(krwPrice(selected.usd))} · ${prevMonth}월평균 대비 ${formatter.percent(changePercent(selected))}`;
 
   if (values.length === 0) {
     // 데이터 부족 상태 — 차트 비우고 안내
@@ -550,6 +579,12 @@ async function loadLivePrices({ forceRefresh = false } = {}) {
       exchangeRate = data.exchangeRate.USD_KRW;
     }
 
+    // 전월 라벨 갱신 (API 값 우선, 없으면 클라이언트 계산)
+    if (Number.isFinite(data.prevMonth)) {
+      prevMonth = data.prevMonth;
+    }
+    updateMonthlyAvgLabels();
+
     commodities = commodities.map((item) => {
       const live = data.prices?.[item.symbol];
       if (live && live.usd != null) {
@@ -659,6 +694,7 @@ els.addCommodityForm.addEventListener("submit", (event) => {
 });
 
 updateTime();
+updateMonthlyAvgLabels();
 renderAll();
 renderAnalysis();
 loadLivePrices();

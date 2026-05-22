@@ -40,11 +40,11 @@
               <strong id="exchangeRate">-</strong>
             </article>
             <article class="metric-card">
-              <span>상승 TOP <em>(월평균 대비)</em></span>
+              <span>상승 TOP <em id="topGainLabel">(월평균 대비)</em></span>
               <strong id="topGain">-</strong>
             </article>
             <article class="metric-card">
-              <span>하락 TOP <em>(월평균 대비)</em></span>
+              <span>하락 TOP <em id="topLossLabel">(월평균 대비)</em></span>
               <strong id="topLoss">-</strong>
             </article>
           </div>
@@ -70,9 +70,9 @@
                 <tr>
                   <th>구분</th>
                   <th>현재 USD</th>
-                  <th>월평균 USD</th>
+                  <th id="prevMonthUsdHeader">월평균 USD</th>
                   <th>현재 KRW</th>
-                  <th>월평균 KRW</th>
+                  <th id="prevMonthKrwHeader">월평균 KRW</th>
                   <th>변화율</th>
                 </tr>
               </thead>
@@ -177,7 +177,7 @@
                   현재 USD
                   <input id="newUsd" required type="number" step="0.0001" placeholder="예: 31.2" />
                 </label>
-                <label class="field">
+                <label class="field" id="newAvgLabel">
                   월평균 USD
                   <input id="newAvg" required type="number" step="0.0001" placeholder="예: 30.5" />
                 </label>
