@@ -144,6 +144,24 @@ let commodities = [
     monthlyAvg: 0,
     unit: "USD/kg",
     source: "KOMIS"
+  },
+  {
+    symbol: "Au",
+    name: "Au(금)",
+    spec: "LBMA 99.99% (USD/oz 원본)",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
+  },
+  {
+    symbol: "Ag",
+    name: "Ag(은)",
+    spec: "LBMA 99.99% (USD/oz 원본)",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
   }
 ];
 

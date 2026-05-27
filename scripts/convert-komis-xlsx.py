@@ -1,12 +1,13 @@
 """
 KOMIS xlsx → JSON 변환.
 
-입력: tmp/komis/{symbol}.xlsx 11개 (download-komis.js가 생성)
-출력: scripts/data/{symbol}-komis.json 11개
+입력: tmp/komis/{symbol}.xlsx (download-komis.js가 생성)
+출력: scripts/data/{symbol}-komis.json
 
-종목별 단위 정규화:
-- USD/kg 표기 종목: 그대로
-- USD/ton, USD/mt 표기 종목: ÷1000
+단위 정규화 — raw_value × factor = USD/kg:
+- USD/kg:  factor = 1
+- USD/T, USD/mt, USD/ton: factor = 0.001
+- USD/oz (트로이 온스, 31.1035g): factor = 32.1507
 """
 
 import json
@@ -20,19 +21,21 @@ except ImportError:
     print("openpyxl 미설치 — pip install openpyxl", file=sys.stderr)
     sys.exit(1)
 
-# (symbol, USD/kg 환산 분모)
-DIVISORS = {
-    "li":    1,
-    "co":    1,
-    "mn":    1000,
-    "ni":    1000,
-    "cu":    1000,
-    "al":    1000,
-    "sn":    1000,
-    "zn":    1000,
-    "pb":    1000,
-    "w_wc":  1,
-    "w_wo3": 1,
+# symbol → factor (raw × factor = USD/kg)
+SYMBOLS = {
+    "li":    1.0,
+    "co":    1.0,
+    "mn":    0.001,
+    "ni":    0.001,
+    "cu":    0.001,
+    "al":    0.001,
+    "sn":    0.001,
+    "zn":    0.001,
+    "pb":    0.001,
+    "w_wc":  1.0,
+    "w_wo3": 1.0,
+    "au":    32.1507,   # USD/oz → USD/kg
+    "ag":    32.1507,
 }
 
 here = Path(__file__).parent
@@ -41,7 +44,7 @@ DATA_DIR = here / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
 
-def convert_one(xlsx_path: Path, symbol: str, divisor: int) -> int:
+def convert_one(xlsx_path: Path, symbol: str, factor: float) -> int:
     wb = openpyxl.load_workbook(xlsx_path, data_only=True)
     ws = wb["RsrcPrice"]
 
@@ -52,7 +55,7 @@ def convert_one(xlsx_path: Path, symbol: str, divisor: int) -> int:
         s = str(row[0])
         iso = f"{s[:4]}-{s[4:6]}-{s[6:8]}"
         raw = float(row[1])
-        usd_per_kg = round(raw / divisor, 6)
+        usd_per_kg = round(raw * factor, 6)
         rows.append([iso, usd_per_kg, raw])
 
     rows.sort(key=lambda r: r[0])
@@ -72,7 +75,7 @@ def main() -> int:
     success = 0
     failures = []
 
-    for symbol, divisor in DIVISORS.items():
+    for symbol, factor in SYMBOLS.items():
         xlsx = TMP_DIR / f"{symbol}.xlsx"
         if not xlsx.exists():
             print(f"⚠ {symbol}: xlsx 없음 ({xlsx})")
@@ -80,14 +83,14 @@ def main() -> int:
             continue
 
         try:
-            count = convert_one(xlsx, symbol, divisor)
-            print(f"✓ {symbol}: {count}행")
+            count = convert_one(xlsx, symbol, factor)
+            print(f"✓ {symbol}: {count}행 (factor={factor})")
             success += 1
         except Exception as e:
             print(f"✗ {symbol}: {e}")
             failures.append(symbol)
 
-    print(f"\n결과: {success}/{len(DIVISORS)} 성공")
+    print(f"\n결과: {success}/{len(SYMBOLS)} 성공")
     return 0 if not failures else 1
 
 
