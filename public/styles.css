@@ -809,3 +809,106 @@ tbody tr:hover {
     min-width: 0;
   }
 }
+
+/* ──────────────── 웰컴 모달 ──────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 22, 30, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-panel {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  width: min(940px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 28px 28px 22px;
+  position: relative;
+  animation: modalSlideIn 0.25s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.modal-close:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--ink);
+}
+
+.modal-title {
+  margin: 0 36px 6px 0;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.modal-sub {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.modal-body table {
+  min-width: 0;
+}
+
+.modal-body th,
+.modal-body td {
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+@media (max-width: 620px) {
+  .modal-panel {
+    padding: 20px 16px 16px;
+    max-height: 95vh;
+  }
+  .modal-title {
+    font-size: 18px;
+  }
+  .modal-body th,
+  .modal-body td {
+    padding: 9px 8px;
+    font-size: 13px;
+  }
+}

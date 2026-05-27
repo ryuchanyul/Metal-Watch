@@ -30,6 +30,9 @@ function updateMonthlyAvgLabels() {
   const numText = `${prevMonth}월평균`;
   if (els.prevMonthUsdHeader) els.prevMonthUsdHeader.textContent = `${numText} USD`;
   if (els.prevMonthKrwHeader) els.prevMonthKrwHeader.textContent = `${numText} KRW`;
+  if (els.welcomePrevMonthUsdHeader) els.welcomePrevMonthUsdHeader.textContent = `${numText} USD`;
+  if (els.welcomePrevMonthKrwHeader) els.welcomePrevMonthKrwHeader.textContent = `${numText} KRW`;
+  if (els.welcomeModalAvgLabel) els.welcomeModalAvgLabel.textContent = numText;
   if (els.topGainLabel) els.topGainLabel.textContent = `(${numText} 대비)`;
   if (els.topLossLabel) els.topLossLabel.textContent = `(${numText} 대비)`;
   if (els.newAvgLabel) {
@@ -176,6 +179,12 @@ const els = {
   topGainLabel: document.querySelector("#topGainLabel"),
   topLossLabel: document.querySelector("#topLossLabel"),
   newAvgLabel: document.querySelector("#newAvgLabel"),
+  welcomeModal: document.querySelector("#welcomeModal"),
+  welcomeModalClose: document.querySelector("#welcomeModalClose"),
+  welcomeModalAvgLabel: document.querySelector("#welcomeModalAvgLabel"),
+  welcomePriceRows: document.querySelector("#welcomePriceRows"),
+  welcomePrevMonthUsdHeader: document.querySelector("#welcomePrevMonthUsdHeader"),
+  welcomePrevMonthKrwHeader: document.querySelector("#welcomePrevMonthKrwHeader"),
   analysisFile: document.querySelector("#analysisFile"),
   fileLabel: document.querySelector("#fileLabel"),
   runAnalysis: document.querySelector("#runAnalysis"),
@@ -271,7 +280,7 @@ function renderPriceTable() {
     return [item.symbol, item.name, item.spec].join(" ").toLowerCase().includes(query);
   });
 
-  els.priceRows.innerHTML = filtered.map((item) => {
+  const rowsHtml = filtered.map((item) => {
     const change = changePercent(item);
     const direction = change >= 0 ? "up" : "down";
     return `
@@ -286,12 +295,27 @@ function renderPriceTable() {
     `;
   }).join("");
 
+  els.priceRows.innerHTML = rowsHtml;
+  // 웰컴 모달 안 테이블도 같은 데이터로 갱신 (검색 필터링 영향 없음 — 검색은 시세표만)
+  if (els.welcomePriceRows) els.welcomePriceRows.innerHTML = rowsHtml;
+
   document.querySelectorAll("#priceRows .clickable-row").forEach((row) => {
     row.addEventListener("click", () => {
       selectCommodity(row.dataset.symbol);
       setView("detail");
     });
   });
+
+  // 모달 안 행 클릭 시 — 모달 닫고 상세 차트로 이동
+  if (els.welcomePriceRows) {
+    els.welcomePriceRows.querySelectorAll(".clickable-row").forEach((row) => {
+      row.addEventListener("click", () => {
+        selectCommodity(row.dataset.symbol);
+        setView("detail");
+        closeWelcomeModal();
+      });
+    });
+  }
 }
 
 // 현재 선택된 종목 symbol (이전 select.value 대체)
@@ -693,8 +717,40 @@ els.addCommodityForm.addEventListener("submit", (event) => {
   setView("prices");
 });
 
+// ─────────── 웰컴 모달 ───────────
+function openWelcomeModal() {
+  if (!els.welcomeModal) return;
+  els.welcomeModal.hidden = false;
+  els.welcomeModal.classList.add("open");
+  document.body.style.overflow = "hidden"; // 배경 스크롤 잠금
+}
+
+function closeWelcomeModal() {
+  if (!els.welcomeModal) return;
+  els.welcomeModal.classList.remove("open");
+  els.welcomeModal.hidden = true;
+  document.body.style.overflow = "";
+}
+
+if (els.welcomeModalClose) {
+  els.welcomeModalClose.addEventListener("click", closeWelcomeModal);
+}
+if (els.welcomeModal) {
+  // 오버레이(패널 밖) 클릭 시 닫기
+  els.welcomeModal.addEventListener("click", (event) => {
+    if (event.target === els.welcomeModal) closeWelcomeModal();
+  });
+  // ESC 키
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !els.welcomeModal.hidden) closeWelcomeModal();
+  });
+}
+
 updateTime();
 updateMonthlyAvgLabels();
 renderAll();
 renderAnalysis();
 loadLivePrices();
+
+// 페이지 첫 진입 시 모달 표시 (대시보드 위에 오버레이)
+openWelcomeModal();

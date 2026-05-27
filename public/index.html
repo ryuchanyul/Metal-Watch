@@ -202,6 +202,32 @@
       </main>
     </div>
 
+    <!-- 첫 접속 시 표시되는 웰컴 모달 (전체 시세표) -->
+    <div class="modal-overlay" id="welcomeModal" role="dialog" aria-modal="true" aria-labelledby="welcomeModalTitle" hidden>
+      <div class="modal-panel" role="document">
+        <button class="modal-close" id="welcomeModalClose" type="button" aria-label="모달 닫기">×</button>
+        <h2 class="modal-title" id="welcomeModalTitle">원자재 시세표</h2>
+        <p class="modal-sub">11개 종목 현재가격과 <span id="welcomeModalAvgLabel">월평균</span> 비교</p>
+        <div class="modal-body">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>구분</th>
+                  <th>현재 USD</th>
+                  <th id="welcomePrevMonthUsdHeader">월평균 USD</th>
+                  <th>현재 KRW</th>
+                  <th id="welcomePrevMonthKrwHeader">월평균 KRW</th>
+                  <th>변화율</th>
+                </tr>
+              </thead>
+              <tbody id="welcomePriceRows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="/app.js" type="module"></script>
   </body>
 </html>
