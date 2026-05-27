@@ -899,16 +899,40 @@ tbody tr:hover {
 }
 
 @media (max-width: 620px) {
+  /* 모바일 풀스크린: 13행이 스크롤 없이 한 번에 보이도록 */
+  .modal-overlay {
+    padding: 0;
+  }
   .modal-panel {
-    padding: 20px 16px 16px;
-    max-height: 95vh;
+    width: 100%;
+    max-height: 100vh;
+    min-height: 100vh;
+    border-radius: 0;
+    padding: 14px 10px 10px;
+    box-shadow: none;
+  }
+  .modal-close {
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
   }
   .modal-title {
-    font-size: 18px;
+    font-size: 17px;
+    margin: 0 36px 8px 0;
   }
   .modal-body th,
   .modal-body td {
-    padding: 9px 8px;
-    font-size: 13px;
+    padding: 6px 5px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  /* 표가 옆으로 살짝 넘쳐도 스크롤바 안 보이게 */
+  .modal-body .table-wrap {
+    border: none;
+    box-shadow: none;
+  }
+  .modal-body table {
+    min-width: 0;
   }
 }
