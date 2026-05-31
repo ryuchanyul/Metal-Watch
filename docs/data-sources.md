@@ -9,7 +9,7 @@
 | 카테고리 | URL | 적재 종목 |
 |---------|-----|---------|
 | 비철금속 | https://www.komis.or.kr/Komis/RsrcPrice/BaseMetals | Cu, Al, Ni, Pb, Zn, Sn |
-| 희소금속 | https://www.komis.or.kr/Komis/RsrcPrice/MinorMetals | Co, Li, Mn, W |
+| 희소금속 | https://www.komis.or.kr/Komis/RsrcPrice/MinorMetals | Co, Li, Mn, Mo, W |
 | 철광석 | https://www.komis.or.kr/Komis/RsrcPrice/IronOre | (참고용, 현재 미적재) |
 
 ## 종목 매핑
@@ -27,6 +27,7 @@
 | 주석 | `Sn` | LME CASH | USD/ton | ÷1000 |
 | 연(납) | `Pb` | LME CASH | USD/ton | ÷1000 |
 | 아연 | `Zn` | LME CASH | USD/ton | ÷1000 |
+| 몰리브덴 | `Mo` | Mo 60%min EXW China | USD/mt | ÷1000 |
 | 텅스텐 WC | `W_WC` | 99.8%min 2.5-7.0μm FOB China | USD/kg | 그대로 |
 | 텅스텐 WO3 | `W_WO3` | 99.95%min EXW China | USD/kg | 그대로 |
 
@@ -134,7 +135,7 @@ gh workflow run backfill-komis.yml --ref master
 
 ```bash
 # 종목별 행 수 확인
-for sym in Co Li Ni Mn Cu Al Sn Zn Pb W_WC W_WO3; do
+for sym in Co Li Ni Mn Cu Al Sn Zn Pb Mo W_WC W_WO3; do
   count=$(curl -s -I "https://tyadxmdxdopeemznrnvv.supabase.co/rest/v1/price_snapshots?source=eq.KOMIS%20%28%EA%B4%91%ED%95%B4%EA%B4%91%EC%97%85%EA%B3%B5%EB%8B%A8%29&symbol=eq.$sym" \
     -H "apikey: <publishable_key>" -H "Prefer: count=exact" | grep -oE "[0-9]+/[0-9]+" | head -1)
   echo "$sym: $count"

@@ -28,6 +28,7 @@ const SYMBOLS = [
   { file: "sn",    db: "Sn",    rawUnit: "USD/ton" },
   { file: "zn",    db: "Zn",    rawUnit: "USD/ton" },
   { file: "pb",    db: "Pb",    rawUnit: "USD/ton" },
+  { file: "mo",    db: "Mo",    rawUnit: "USD/mt" },
   { file: "w_wc",  db: "W_WC",  rawUnit: "USD/kg" },
   { file: "w_wo3", db: "W_WO3", rawUnit: "USD/kg" },
   { file: "au",    db: "Au",    rawUnit: "USD/oz" },

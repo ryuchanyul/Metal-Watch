@@ -146,6 +146,15 @@ let commodities = [
     source: "KOMIS"
   },
   {
+    symbol: "Mo",
+    name: "Mo(몰리브덴)",
+    spec: "Mo 60%min EXW China",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
+  },
+  {
     symbol: "Au",
     name: "Au(금)",
     spec: "LBMA 99.99% (USD/oz 원본)",

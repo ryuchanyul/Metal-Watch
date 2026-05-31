@@ -32,6 +32,7 @@ SYMBOLS = {
     "sn":    0.001,
     "zn":    0.001,
     "pb":    0.001,
+    "mo":    0.001,   # USD/mt → USD/kg
     "w_wc":  1.0,
     "w_wo3": 1.0,
     "au":    32.1507,   # USD/oz → USD/kg

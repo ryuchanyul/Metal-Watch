@@ -24,6 +24,7 @@ const TARGETS = [
   { category: "MinorMetals", korean: "리튬",   symbol: "li" },
   { category: "MinorMetals", korean: "코발트", symbol: "co" },
   { category: "MinorMetals", korean: "망간",   symbol: "mn" },
+  { category: "MinorMetals", korean: "몰리브덴", symbol: "mo" },
   { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "Carbide", symbol: "w_wc" },
   { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "Oxide",   symbol: "w_wo3" },
   // 귀금속 (MinorMetals 페이지) — USD/oz
