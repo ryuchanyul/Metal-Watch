@@ -30,6 +30,10 @@
 | 몰리브덴 | `Mo` | Mo 60%min EXW China | USD/mt | ÷1000 |
 | 텅스텐 WC | `W_WC` | 99.8%min 2.5-7.0μm FOB China | USD/kg | 그대로 |
 | 텅스텐 WO3 | `W_WO3` | 99.95%min EXW China | USD/kg | 그대로 |
+| 금 | `Au` | LBMA 99.99% | USD/oz | ×32.1507 |
+| 은 | `Ag` | LBMA 99.99% | USD/oz | ×32.1507 |
+| 마그네슘 | `Mg` | 99.9%min FOB China | USD/mt | ÷1000 |
+| 티타늄 | `Ti` | 70%min In warehouse Rotterdam | USD/kg | 그대로 |
 
 ## 다운로드 → 적재 흐름 (자동)
 

@@ -175,7 +175,7 @@ let commodities = [
   {
     symbol: "Mg",
     name: "Mg(마그네슘)",
-    spec: "Magnesium Ingot (USD/T 원본)",
+    spec: "99.9%min FOB China",
     usd: 0,
     monthlyAvg: 0,
     unit: "USD/kg",
@@ -184,7 +184,7 @@ let commodities = [
   {
     symbol: "Ti",
     name: "Ti(티타늄)",
-    spec: "Titanium (USD/kg)",
+    spec: "70%min In warehouse Rotterdam",
     usd: 0,
     monthlyAvg: 0,
     unit: "USD/kg",
