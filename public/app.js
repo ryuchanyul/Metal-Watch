@@ -171,6 +171,24 @@ let commodities = [
     monthlyAvg: 0,
     unit: "USD/kg",
     source: "KOMIS"
+  },
+  {
+    symbol: "Mg",
+    name: "Mg(마그네슘)",
+    spec: "Magnesium Ingot (USD/T 원본)",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
+  },
+  {
+    symbol: "Ti",
+    name: "Ti(티타늄)",
+    spec: "Titanium (USD/kg)",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
   }
 ];
 

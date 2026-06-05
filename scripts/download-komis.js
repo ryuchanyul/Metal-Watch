@@ -29,7 +29,10 @@ const TARGETS = [
   { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "Oxide",   symbol: "w_wo3" },
   // 귀금속 (MinorMetals 페이지) — USD/oz
   { category: "MinorMetals", korean: "금", symbol: "au" },
-  { category: "MinorMetals", korean: "은", symbol: "ag" }
+  { category: "MinorMetals", korean: "은", symbol: "ag" },
+  // 마그네슘 (USD/T), 티타늄 (USD/kg)
+  { category: "MinorMetals", korean: "마그네슘", symbol: "mg" },
+  { category: "MinorMetals", korean: "티타늄",   symbol: "ti" }
 ];
 
 const CATEGORY_URL = {

@@ -32,7 +32,9 @@ const SYMBOLS = [
   { file: "w_wc",  db: "W_WC",  rawUnit: "USD/kg" },
   { file: "w_wo3", db: "W_WO3", rawUnit: "USD/kg" },
   { file: "au",    db: "Au",    rawUnit: "USD/oz" },
-  { file: "ag",    db: "Ag",    rawUnit: "USD/oz" }
+  { file: "ag",    db: "Ag",    rawUnit: "USD/oz" },
+  { file: "mg",    db: "Mg",    rawUnit: "USD/T" },
+  { file: "ti",    db: "Ti",    rawUnit: "USD/kg" }
 ];
 
 const here = dirname(fileURLToPath(import.meta.url));
