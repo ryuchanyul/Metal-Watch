@@ -189,6 +189,17 @@ let commodities = [
     monthlyAvg: 0,
     unit: "USD/kg",
     source: "KOMIS"
+  },
+  {
+    symbol: "Ba",
+    name: "Ba(바륨)",
+    spec: "99%min 산업용 (추정값, 자동 수집 불가)",
+    usd: 25,
+    usdRange: 5,
+    isEstimate: true,
+    monthlyAvg: 25,
+    unit: "USD/kg",
+    source: "Manual estimate (분기 수동 갱신)"
   }
 ];
 
@@ -284,7 +295,10 @@ function renderTopChange(element, symbol, change) {
 }
 
 function renderDashboard() {
-  const ranked = [...commodities].sort((a, b) => changePercent(b) - changePercent(a));
+  // 추정값 종목(isEstimate)은 변동률 0이라 TOP 계산에서 제외
+  const ranked = [...commodities]
+    .filter((item) => !item.isEstimate)
+    .sort((a, b) => changePercent(b) - changePercent(a));
   const gain = ranked[0];
   const loss = ranked[ranked.length - 1];
 
@@ -326,6 +340,22 @@ function renderPriceTable() {
   });
 
   const rowsHtml = filtered.map((item) => {
+    // 추정값 종목(예: Ba): "$25 ±$5" 형태로 표시, 변동률은 ±%
+    if (item.isEstimate) {
+      const range = item.usdRange || 0;
+      const rangePct = item.usd ? (range / item.usd) * 100 : 0;
+      return `
+      <tr class="clickable-row estimate-row" data-symbol="${item.symbol}">
+        <td><strong>${item.name.replace("(", " (")}</strong><br><small>${item.spec}</small></td>
+        <td>${formatter.usd(item.usd)} <span class="range">±${formatter.usd(range).replace("$","$")}</span></td>
+        <td class="avg-cell">-</td>
+        <td>${formatter.krw(krwPrice(item.usd))} <span class="range">±${formatter.krw(krwPrice(range))}</span></td>
+        <td>-</td>
+        <td><span class="change estimate">±${rangePct.toFixed(0)}%</span></td>
+      </tr>
+    `;
+    }
+
     const change = changePercent(item);
     const direction = change >= 0 ? "up" : "down";
     return `
