@@ -32,7 +32,8 @@ const TARGETS = [
   { category: "MinorMetals", korean: "은", symbol: "ag" },
   // 마그네슘 (USD/T), 티타늄 (USD/kg)
   { category: "MinorMetals", korean: "마그네슘", symbol: "mg" },
-  { category: "MinorMetals", korean: "티타늄",   symbol: "ti" }
+  { category: "MinorMetals", korean: "티타늄",   symbol: "ti" },
+  { category: "MinorMetals", korean: "인듐",     symbol: "in" }
 ];
 
 const CATEGORY_URL = {

@@ -191,6 +191,15 @@ let commodities = [
     source: "KOMIS"
   },
   {
+    symbol: "In",
+    name: "In(인듐)",
+    spec: "99.995%min EXW China",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
+  },
+  {
     symbol: "Ba",
     name: "Ba(바륨)",
     spec: "99%min 산업용 (추정값, 자동 수집 불가)",

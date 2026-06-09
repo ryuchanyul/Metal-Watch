@@ -34,6 +34,7 @@
 | 은 | `Ag` | LBMA 99.99% | USD/oz | ×32.1507 |
 | 마그네슘 | `Mg` | 99.9%min FOB China | USD/mt | ÷1000 |
 | 티타늄 | `Ti` | 70%min In warehouse Rotterdam | USD/kg | 그대로 |
+| 인듐 | `In` | 99.995%min EXW China | USD/kg | 그대로 |
 
 ## 다운로드 → 적재 흐름 (자동)
 

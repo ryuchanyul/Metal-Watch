@@ -39,6 +39,7 @@ SYMBOLS = {
     "ag":    32.1507,
     "mg":    0.001,     # USD/T → USD/kg
     "ti":    1.0,       # USD/kg 그대로
+    "in":    1.0,       # USD/kg 그대로
 }
 
 here = Path(__file__).parent
