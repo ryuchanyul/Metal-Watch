@@ -127,6 +127,12 @@
                 <input id="analysisFile" type="file" accept="image/jpeg,image/png,image/webp,image/jpg" hidden />
                 <span class="upload-hint" id="uploadHint">이미지를 클릭해서 선택하거나<br/>이 영역에 끌어다 놓으세요</span>
               </label>
+              <div class="upload-or-divider" id="uploadOrDivider"><span>또는</span></div>
+              <button id="cameraBtn" class="camera-btn" type="button">
+                <span class="camera-icon" aria-hidden="true">📷</span>
+                <span>카메라로 촬영</span>
+              </button>
+              <input id="cameraInput" type="file" accept="image/*" capture="environment" hidden />
               <img id="previewImage" class="preview-image" alt="업로드 미리보기" hidden />
               <div class="upload-actions">
                 <button id="runOcrBtn" class="primary-action" disabled>OCR 분석 실행</button>

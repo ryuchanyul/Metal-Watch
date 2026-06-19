@@ -273,6 +273,9 @@ const els = {
   previewImage: document.querySelector("#previewImage"),
   runOcrBtn: document.querySelector("#runOcrBtn"),
   clearUploadBtn: document.querySelector("#clearUploadBtn"),
+  cameraBtn: document.querySelector("#cameraBtn"),
+  cameraInput: document.querySelector("#cameraInput"),
+  uploadOrDivider: document.querySelector("#uploadOrDivider"),
   ocrStatus: document.querySelector("#ocrStatus"),
   exSample: document.querySelector("#exSample"),
   exReport: document.querySelector("#exReport"),
@@ -710,6 +713,8 @@ async function handleFileSelected(file) {
     els.previewImage.src = dataUrl;
     els.previewImage.hidden = false;
     els.uploadZone.hidden = true;
+    els.cameraBtn.hidden = true;
+    els.uploadOrDivider.hidden = true;
     els.runOcrBtn.disabled = false;
     els.clearUploadBtn.hidden = false;
     setOcrStatus("OCR 분석 실행 버튼을 눌러주세요", "info");
@@ -721,9 +726,12 @@ async function handleFileSelected(file) {
 function clearUpload() {
   analysisState.imageDataUrl = null;
   els.analysisFile.value = "";
+  els.cameraInput.value = "";
   els.previewImage.src = "";
   els.previewImage.hidden = true;
   els.uploadZone.hidden = false;
+  els.cameraBtn.hidden = false;
+  els.uploadOrDivider.hidden = false;
   els.runOcrBtn.disabled = true;
   els.clearUploadBtn.hidden = true;
   setOcrStatus("");
@@ -1110,6 +1118,10 @@ els.uploadZone.addEventListener("drop", (e) => {
 
 els.runOcrBtn.addEventListener("click", runOcr);
 els.clearUploadBtn.addEventListener("click", clearUpload);
+els.cameraBtn.addEventListener("click", () => els.cameraInput.click());
+els.cameraInput.addEventListener("change", () => {
+  handleFileSelected(els.cameraInput.files[0]);
+});
 
 // 시료 메타 정보 input → state 반영
 els.exSample.addEventListener("input", (e) => { analysisState.meta.sampleName = e.target.value; });

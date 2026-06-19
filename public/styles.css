@@ -1680,3 +1680,57 @@ tbody tr:hover {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ===== 카메라 촬영 버튼 ===== */
+.upload-or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted, #6d7b88);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 4px 0;
+}
+
+.upload-or-divider::before,
+.upload-or-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line, #dbe3e8);
+}
+
+.upload-or-divider[hidden] {
+  display: none;
+}
+
+.camera-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--green, #157a5b);
+  background: #fff;
+  color: var(--green, #157a5b);
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.camera-btn:hover {
+  background: var(--green, #157a5b);
+  color: #fff;
+}
+
+.camera-btn .camera-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.camera-btn[hidden] {
+  display: none;
+}
