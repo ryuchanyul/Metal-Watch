@@ -709,7 +709,7 @@ async function handleFileSelected(file) {
     analysisState.imageDataUrl = dataUrl;
     els.previewImage.src = dataUrl;
     els.previewImage.hidden = false;
-    els.uploadHint.hidden = true;
+    els.uploadZone.hidden = true;
     els.runOcrBtn.disabled = false;
     els.clearUploadBtn.hidden = false;
     setOcrStatus("OCR 분석 실행 버튼을 눌러주세요", "info");
@@ -723,7 +723,7 @@ function clearUpload() {
   els.analysisFile.value = "";
   els.previewImage.src = "";
   els.previewImage.hidden = true;
-  els.uploadHint.hidden = false;
+  els.uploadZone.hidden = false;
   els.runOcrBtn.disabled = true;
   els.clearUploadBtn.hidden = true;
   setOcrStatus("");

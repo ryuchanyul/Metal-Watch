@@ -1056,6 +1056,10 @@ tbody tr:hover {
   display: none;
 }
 
+.upload-zone[hidden] {
+  display: none;
+}
+
 .upload-actions {
   display: flex;
   gap: 8px;
