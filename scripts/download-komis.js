@@ -30,16 +30,16 @@ const TARGETS = [
   // 마그네슘 (USD/T), 티타늄 (USD/kg)
   { category: "MinorMetals", korean: "마그네슘", symbol: "mg" },
   { category: "MinorMetals", korean: "티타늄",   symbol: "ti" },
-  { category: "MinorMetals", korean: "인듐",     symbol: "in" }
-  // 금/은: 2026-06-10 이후 KOMIS MinorMetals에서 사라짐 — 자동 수집 일시 중단.
-  // 기존 Supabase 데이터는 그대로 유지. 새 카테고리 위치 확인 후 복구 예정.
-  // { category: "MinorMetals", korean: "금", symbol: "au" },
-  // { category: "MinorMetals", korean: "은", symbol: "ag" }
+  { category: "MinorMetals", korean: "인듐",     symbol: "in" },
+  // 귀금속 (EtcMnrl 페이지) — 2026-06-19 KOMIS 카테고리 이동 확인 후 복구
+  { category: "EtcMnrl", korean: "금", symbol: "au" },
+  { category: "EtcMnrl", korean: "은", symbol: "ag" }
 ];
 
 const CATEGORY_URL = {
   BaseMetals: "https://www.komis.or.kr/Komis/RsrcPrice/BaseMetals",
-  MinorMetals: "https://www.komis.or.kr/Komis/RsrcPrice/MinorMetals"
+  MinorMetals: "https://www.komis.or.kr/Komis/RsrcPrice/MinorMetals",
+  EtcMnrl: "https://www.komis.or.kr/Komis/RsrcPrice/EtcMnrl"
 };
 
 const FETCH_TIMEOUT = 30_000;
