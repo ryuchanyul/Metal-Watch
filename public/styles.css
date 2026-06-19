@@ -1287,3 +1287,44 @@ tbody tr:hover {
   .extract-meta { grid-template-columns: 1fr; }
   .result-summary-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== OCR 분석 진행 모달 ===== */
+.ocr-loading-panel {
+  width: min(360px, 100%);
+  text-align: center;
+  padding: 36px 28px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ocr-loading-panel .modal-title {
+  margin: 4px 0 0 0;
+  font-size: 18px;
+}
+
+.ocr-loading-text {
+  margin: 0;
+  color: #374151;
+  font-size: 14px;
+}
+
+.ocr-loading-sub {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.loading-spinner {
+  width: 56px;
+  height: 56px;
+  border: 5px solid #e5e7eb;
+  border-top-color: var(--green, #157a5b);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

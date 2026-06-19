@@ -254,6 +254,7 @@ const els = {
   welcomeModal: document.querySelector("#welcomeModal"),
   welcomeModalClose: document.querySelector("#welcomeModalClose"),
   welcomeModalAvgLabel: document.querySelector("#welcomeModalAvgLabel"),
+  ocrLoadingModal: document.querySelector("#ocrLoadingModal"),
   welcomePriceRows: document.querySelector("#welcomePriceRows"),
   welcomePrevMonthUsdHeader: document.querySelector("#welcomePrevMonthUsdHeader"),
   welcomePrevMonthKrwHeader: document.querySelector("#welcomePrevMonthKrwHeader"),
@@ -726,10 +727,23 @@ function clearUpload() {
   setOcrStatus("");
 }
 
+function openOcrLoadingModal() {
+  if (!els.ocrLoadingModal) return;
+  els.ocrLoadingModal.hidden = false;
+  els.ocrLoadingModal.classList.add("open");
+}
+
+function closeOcrLoadingModal() {
+  if (!els.ocrLoadingModal) return;
+  els.ocrLoadingModal.classList.remove("open");
+  els.ocrLoadingModal.hidden = true;
+}
+
 async function runOcr() {
   if (!analysisState.imageDataUrl) return;
   els.runOcrBtn.disabled = true;
   setOcrStatus("Claude Vision 분석 중... (5~10초)", "info");
+  openOcrLoadingModal();
 
   try {
     const res = await fetch("/api/ocr-analyze", {
@@ -748,6 +762,7 @@ async function runOcr() {
     setOcrStatus(`OCR 실패: ${e.message}`, "error");
   } finally {
     els.runOcrBtn.disabled = false;
+    closeOcrLoadingModal();
   }
 }
 

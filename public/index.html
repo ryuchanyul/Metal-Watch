@@ -247,6 +247,16 @@
       </main>
     </div>
 
+    <!-- OCR 분석 진행 모달 -->
+    <div class="modal-overlay" id="ocrLoadingModal" role="dialog" aria-modal="true" aria-labelledby="ocrLoadingTitle" hidden>
+      <div class="modal-panel ocr-loading-panel" role="document">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <h2 class="modal-title" id="ocrLoadingTitle">시험성적서 분석 중</h2>
+        <p class="ocr-loading-text">Claude Vision이 이미지를 읽고 있어요</p>
+        <p class="ocr-loading-sub">보통 5~10초 소요됩니다</p>
+      </div>
+    </div>
+
     <!-- 첫 접속 시 표시되는 웰컴 모달 (전체 시세표) -->
     <div class="modal-overlay" id="welcomeModal" role="dialog" aria-modal="true" aria-labelledby="welcomeModalTitle" hidden>
       <div class="modal-panel" role="document">
