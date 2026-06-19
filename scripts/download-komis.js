@@ -27,13 +27,14 @@ const TARGETS = [
   { category: "MinorMetals", korean: "몰리브덴", symbol: "mo" },
   { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "Carbide", symbol: "w_wc" },
   { category: "MinorMetals", korean: "텅스텐", prcCrtrKeyword: "Oxide",   symbol: "w_wo3" },
-  // 귀금속 (MinorMetals 페이지) — USD/oz
-  { category: "MinorMetals", korean: "금", symbol: "au" },
-  { category: "MinorMetals", korean: "은", symbol: "ag" },
   // 마그네슘 (USD/T), 티타늄 (USD/kg)
   { category: "MinorMetals", korean: "마그네슘", symbol: "mg" },
   { category: "MinorMetals", korean: "티타늄",   symbol: "ti" },
   { category: "MinorMetals", korean: "인듐",     symbol: "in" }
+  // 금/은: 2026-06-10 이후 KOMIS MinorMetals에서 사라짐 — 자동 수집 일시 중단.
+  // 기존 Supabase 데이터는 그대로 유지. 새 카테고리 위치 확인 후 복구 예정.
+  // { category: "MinorMetals", korean: "금", symbol: "au" },
+  // { category: "MinorMetals", korean: "은", symbol: "ag" }
 ];
 
 const CATEGORY_URL = {
@@ -173,7 +174,16 @@ async function main() {
   if (failures.length) {
     console.log("실패 종목:");
     failures.forEach((f) => console.log(`  - ${f.symbol}: ${f.error}`));
+  }
+
+  // 일부 실패해도 workflow 다음 step(commit + backfill) 계속.
+  // 단 절반 이상 실패하면 fail (전반 문제로 간주, 사이트 다운 등).
+  if (success === 0) {
+    console.error("[중대 실패] 모든 종목 다운로드 실패 — 사이트 다운 또는 큰 변경");
     process.exit(1);
+  }
+  if (failures.length > success) {
+    console.warn(`[부분 실패] ${failures.length}건 실패, 그러나 ${success}건 성공 — 다음 step 계속`);
   }
 }
 
