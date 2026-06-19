@@ -22,3 +22,26 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: node scripts/backfill-naver.js
+
+      - name: 텔레그램 실패 알림
+        if: failure()
+        continue-on-error: true
+        env:
+          BOT: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          WF: ${{ github.workflow }}
+          RUN_ID: ${{ github.run_id }}
+          BRANCH: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$BOT" ] || [ -z "$CHAT" ]; then
+            echo "TELEGRAM_BOT_TOKEN 또는 TELEGRAM_CHAT_ID 미설정 — 알림 건너뜀"
+            exit 0
+          fi
+          SHA_SHORT="${GITHUB_SHA:0:7}"
+          TEXT=$(printf '🚨 [Metal Watch] %s 실패\n\n실행: #%s\n브랜치: %s\n커밋: %s\n\n로그: https://github.com/%s/actions/runs/%s' \
+            "$WF" "$RUN_ID" "$BRANCH" "$SHA_SHORT" "$REPO" "$RUN_ID")
+          curl -sS -X POST "https://api.telegram.org/bot${BOT}/sendMessage" \
+            --data-urlencode "chat_id=${CHAT}" \
+            --data-urlencode "text=${TEXT}" \
+            --data-urlencode "disable_web_page_preview=true"
