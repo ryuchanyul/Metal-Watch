@@ -1054,6 +1054,17 @@ function onCalcMetalDelete(event) {
   renderCalcTable(tabId);
 }
 
+function onAddMetalClick(event) {
+  const btn = event.target.closest("[data-add-metal]");
+  if (!btn) return;
+  const panel = btn.closest(".calc-tab-panel");
+  if (!panel) return;
+  const tabId = panel.dataset.panel;
+  const tab = analysisState.tabs[tabId];
+  tab.metals.push({ name: "", symbol: "", content: null });
+  renderCalcTable(tabId);
+}
+
 // ===== 분석 저장 =====
 function setSaveStatus(message, kind = "info") {
   if (!els.saveStatus) return;
@@ -1319,7 +1330,10 @@ els.calcTabs.forEach((btn) => {
 // 계산표 input 변경 + 메탈 삭제 (탭 패널에 위임)
 els.calcPanels.forEach((panel) => {
   panel.addEventListener("input", onCalcTableInput);
-  panel.addEventListener("click", onCalcMetalDelete);
+  panel.addEventListener("click", (e) => {
+    onCalcMetalDelete(e);
+    onAddMetalClick(e);
+  });
 });
 
 // 저장 버튼 + 저장 완료 모달
