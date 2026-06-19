@@ -15,6 +15,11 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   process.exit(1);
 }
 
+// 키 형식 진단 (보안: 첫 12자만 노출)
+console.log("[DEBUG] SUPABASE_SERVICE_KEY prefix:", SUPABASE_SERVICE_KEY.substring(0, 12) + "...");
+console.log("[DEBUG] SUPABASE_SERVICE_KEY length:", SUPABASE_SERVICE_KEY.length);
+console.log("[DEBUG] runner UTC time:", new Date().toISOString());
+
 async function insertRows(table, rows) {
   if (!rows.length) {
     console.log(`[${table}] 적재할 행 없음`);
