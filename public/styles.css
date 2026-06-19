@@ -885,15 +885,16 @@ tbody tr:hover {
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border: none;
   border-radius: 50%;
-  background: transparent;
-  color: var(--muted);
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--ink);
   font-size: 26px;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1;
+  z-index: 10;
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
 }
@@ -1364,5 +1365,53 @@ tbody tr:hover {
   /* 카드 안 input 텍스트가 너무 크면 viewport 넘침 방지 */
   .field input {
     max-width: 100%;
+  }
+}
+
+/* ===== 모달 하단 큰 닫기 버튼 (모바일 친화) ===== */
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--line, #dbe3e8);
+  margin-top: 14px;
+}
+
+.modal-close-large {
+  background: var(--green, #157a5b);
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 14px 40px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.modal-close-large:hover {
+  background: #0e5a43;
+}
+
+@media (max-width: 620px) {
+  .modal-close-large {
+    width: 100%;
+    min-width: 0;
+    padding: 16px;
+    font-size: 17px;
+  }
+  .modal-footer {
+    padding: 12px 0 6px;
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    z-index: 5;
+  }
+  /* × 버튼도 더 잘 보이게 (모바일) */
+  .modal-close {
+    background: rgba(0, 0, 0, 0.12);
+    width: 42px;
+    height: 42px;
+    font-size: 28px;
   }
 }

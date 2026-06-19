@@ -253,6 +253,7 @@ const els = {
   newAvgLabel: document.querySelector("#newAvgLabel"),
   welcomeModal: document.querySelector("#welcomeModal"),
   welcomeModalClose: document.querySelector("#welcomeModalClose"),
+  welcomeModalCloseLarge: document.querySelector("#welcomeModalCloseLarge"),
   welcomeModalAvgLabel: document.querySelector("#welcomeModalAvgLabel"),
   ocrLoadingModal: document.querySelector("#ocrLoadingModal"),
   welcomePriceRows: document.querySelector("#welcomePriceRows"),
@@ -1141,6 +1142,9 @@ function closeWelcomeModal() {
 
 if (els.welcomeModalClose) {
   els.welcomeModalClose.addEventListener("click", closeWelcomeModal);
+}
+if (els.welcomeModalCloseLarge) {
+  els.welcomeModalCloseLarge.addEventListener("click", closeWelcomeModal);
 }
 if (els.welcomeModal) {
   // 오버레이(패널 밖) 클릭 시 닫기
