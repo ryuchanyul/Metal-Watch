@@ -292,6 +292,14 @@ const els = {
   saveSuccessModal: document.querySelector("#saveSuccessModal"),
   saveSuccessClose: document.querySelector("#saveSuccessClose"),
   savedAnalysisId: document.querySelector("#savedAnalysisId"),
+  refreshInventoryBtn: document.querySelector("#refreshInventoryBtn"),
+  inventoryRows: document.querySelector("#inventoryRows"),
+  inventoryStatus: document.querySelector("#inventoryStatus"),
+  inventoryDetailModal: document.querySelector("#inventoryDetailModal"),
+  inventoryDetailBody: document.querySelector("#inventoryDetailBody"),
+  inventoryDetailClose: document.querySelector("#inventoryDetailClose"),
+  inventoryDetailCloseLarge: document.querySelector("#inventoryDetailCloseLarge"),
+  inventoryDetailTitle: document.querySelector("#inventoryDetailTitle"),
   addCommodityForm: document.querySelector("#addCommodityForm"),
   newName: document.querySelector("#newName"),
   newSymbol: document.querySelector("#newSymbol"),
@@ -1194,6 +1202,135 @@ function setView(viewName) {
   document.querySelectorAll("[data-view]").forEach((button) => {
     button.classList.toggle("active", button.dataset.view === viewName);
   });
+  // 재고 탭 진입 시 자동 로드
+  if (viewName === "inventory") {
+    loadInventory();
+  }
+}
+
+// ===== 재고 (저장된 분석) =====
+let inventoryLoaded = false;
+let inventoryRecords = [];
+
+function setInventoryStatus(message, kind = "info") {
+  if (!els.inventoryStatus) return;
+  els.inventoryStatus.textContent = message || "";
+  els.inventoryStatus.className = "inventory-status" + (kind === "error" ? " error" : "");
+}
+
+async function loadInventory() {
+  setInventoryStatus("불러오는 중...");
+  try {
+    const res = await fetch("/api/analysis/list?limit=100");
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
+    inventoryRecords = data.records || [];
+    inventoryLoaded = true;
+    renderInventoryList(inventoryRecords);
+    setInventoryStatus(`총 ${data.total ?? inventoryRecords.length}건`);
+  } catch (e) {
+    console.error("[inventory] 실패:", e);
+    setInventoryStatus(`불러오기 실패: ${e.message}`, "error");
+    els.inventoryRows.innerHTML = `<tr><td colspan="7" class="empty-cell">불러오기 실패</td></tr>`;
+  }
+}
+
+function renderInventoryList(records) {
+  if (!records.length) {
+    els.inventoryRows.innerHTML = `<tr><td colspan="7" class="empty-cell">저장된 분석이 없습니다. 분석표 탭에서 "재고로 반영하기"를 눌러보세요.</td></tr>`;
+    return;
+  }
+  els.inventoryRows.innerHTML = "";
+  records.forEach((rec) => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = rec.id;
+    const date = rec.created_at ? new Date(rec.created_at) : null;
+    const dateStr = date ? `${date.getMonth() + 1}/${date.getDate()} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}` : "-";
+    const a = rec.tabs?.A?.results;
+    const b = rec.tabs?.B?.results;
+    const aKrw = a?.krwPerKg != null ? formatter.krw(a.krwPerKg) : "-";
+    const bKrw = b?.krwPerKg != null ? formatter.krw(b.krwPerKg) : "-";
+    const notes = (rec.notes || "").substring(0, 20) + (rec.notes?.length > 20 ? "..." : "");
+    const status = rec.erp_status || "draft";
+    tr.innerHTML = `
+      <td>${dateStr}</td>
+      <td><strong>${rec.sample_name || "-"}</strong></td>
+      <td>${rec.report_number || "-"}</td>
+      <td class="num">${aKrw}</td>
+      <td class="num">${bKrw}</td>
+      <td>${notes || "-"}</td>
+      <td><span class="erp-status-pill ${status}">${status}</span></td>
+    `;
+    tr.addEventListener("click", () => showInventoryDetail(rec));
+    els.inventoryRows.appendChild(tr);
+  });
+}
+
+function showInventoryDetail(rec) {
+  if (!els.inventoryDetailModal) return;
+  els.inventoryDetailTitle.textContent = rec.sample_name || "분석 상세";
+
+  const date = rec.created_at ? new Date(rec.created_at) : null;
+  const dateStr = date ? date.toLocaleString("ko-KR") : "-";
+
+  const fmtUsd = (v) => v != null && Number.isFinite(v) ? "$" + Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "-";
+  const fmtKrw = (v) => v != null && Number.isFinite(v) ? formatter.krw(v) : "-";
+
+  const renderTab = (tabKey, tabData) => {
+    if (!tabData) return "";
+    const metals = tabData.metals || [];
+    const results = tabData.results || {};
+    const moisture = tabData.moisture ?? "-";
+    const totalQty = tabData.totalQty ?? "-";
+    const metalRows = metals.map((m) => {
+      const payRate = tabData.payRates?.[m.symbol] ?? 100;
+      return `<tr>
+        <td>${m.name || m.symbol || "-"}</td>
+        <td>${m.content != null ? Number(m.content).toFixed(4) + "%" : "-"}</td>
+        <td>${payRate.toFixed?.(1) ?? payRate}%</td>
+      </tr>`;
+    }).join("");
+    return `
+      <div class="detail-tab-block">
+        <h3>습식 ${tabKey}</h3>
+        <table>
+          <thead><tr><th>메탈</th><th>함량</th><th>지불률</th></tr></thead>
+          <tbody>${metalRows || `<tr><td colspan="3" style="text-align:center;color:#9ca3af">메탈 없음</td></tr>`}</tbody>
+        </table>
+        <div style="margin-top:8px;font-size:12px;color:#6b7280">수분 ${moisture}% · 총수량 ${totalQty}kg</div>
+        <div class="detail-summary">
+          <div class="detail-summary-card"><span>총액</span><strong>${fmtUsd(results.totalUsd)}</strong></div>
+          <div class="detail-summary-card"><span>단가 $/kg</span><strong>${results.usdPerKg != null ? "$" + Number(results.usdPerKg).toFixed(2) : "-"}</strong></div>
+          <div class="detail-summary-card"><span>단가 ₩/kg</span><strong>${fmtKrw(results.krwPerKg)}</strong></div>
+        </div>
+      </div>
+    `;
+  };
+
+  els.inventoryDetailBody.innerHTML = `
+    <div class="inventory-detail-body">
+      <dl class="detail-meta">
+        <dt>저장일시</dt><dd>${dateStr}</dd>
+        <dt>성적서번호</dt><dd>${rec.report_number || "-"}</dd>
+        <dt>시험완료일</dt><dd>${rec.test_date || "-"}</dd>
+        <dt>발급기관</dt><dd>${rec.issuer || "-"}</dd>
+        <dt>저장시점 환율</dt><dd>₩${rec.exchange_rate_snapshot?.toLocaleString("ko-KR") || "-"}</dd>
+        <dt>상태</dt><dd><span class="erp-status-pill ${rec.erp_status || "draft"}">${rec.erp_status || "draft"}</span></dd>
+      </dl>
+      ${renderTab("A", rec.tabs?.A)}
+      ${renderTab("B", rec.tabs?.B)}
+      ${rec.notes ? `<div class="detail-notes"><strong>메모</strong><br/>${rec.notes}</div>` : ""}
+    </div>
+  `;
+
+  els.inventoryDetailModal.hidden = false;
+  els.inventoryDetailModal.classList.add("open");
+}
+
+function closeInventoryDetail() {
+  if (!els.inventoryDetailModal) return;
+  els.inventoryDetailModal.classList.remove("open");
+  els.inventoryDetailModal.hidden = true;
 }
 
 async function loadLivePrices({ forceRefresh = false } = {}) {
@@ -1346,6 +1483,22 @@ if (els.saveSuccessClose) {
 if (els.saveSuccessModal) {
   els.saveSuccessModal.addEventListener("click", (event) => {
     if (event.target === els.saveSuccessModal) closeSaveSuccessModal();
+  });
+}
+
+// 재고 탭 이벤트
+if (els.refreshInventoryBtn) {
+  els.refreshInventoryBtn.addEventListener("click", loadInventory);
+}
+if (els.inventoryDetailClose) {
+  els.inventoryDetailClose.addEventListener("click", closeInventoryDetail);
+}
+if (els.inventoryDetailCloseLarge) {
+  els.inventoryDetailCloseLarge.addEventListener("click", closeInventoryDetail);
+}
+if (els.inventoryDetailModal) {
+  els.inventoryDetailModal.addEventListener("click", (event) => {
+    if (event.target === els.inventoryDetailModal) closeInventoryDetail();
   });
 }
 

@@ -21,6 +21,7 @@
           <button data-view="prices">시세표</button>
           <button data-view="detail">상세 차트</button>
           <button data-view="analysis">분석표</button>
+          <button data-view="inventory">재고</button>
           <button data-view="settings">설정</button>
         </nav>
       </aside>
@@ -264,6 +265,32 @@
           </div>
         </section>
 
+        <section class="view" id="inventory">
+          <div class="section-heading">
+            <h2>재고 (저장된 분석)</h2>
+            <button id="refreshInventoryBtn" class="text-button">새로고침</button>
+          </div>
+          <div class="inventory-status" id="inventoryStatus"></div>
+          <div class="inventory-list-wrap">
+            <table class="inventory-table">
+              <thead>
+                <tr>
+                  <th>저장일</th>
+                  <th>시료명</th>
+                  <th>성적서번호</th>
+                  <th class="num">A 단가 ₩/kg</th>
+                  <th class="num">B 단가 ₩/kg</th>
+                  <th>메모</th>
+                  <th>상태</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryRows">
+                <tr><td colspan="7" class="empty-cell">불러오는 중...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
         <section class="view" id="settings">
           <div class="settings-grid">
             <article class="panel">
@@ -306,6 +333,20 @@
           </div>
         </section>
       </main>
+    </div>
+
+    <!-- 재고 상세 모달 -->
+    <div class="modal-overlay" id="inventoryDetailModal" role="dialog" aria-modal="true" aria-labelledby="inventoryDetailTitle" hidden>
+      <div class="modal-panel inventory-detail-panel" role="document">
+        <button class="modal-close" id="inventoryDetailClose" type="button" aria-label="모달 닫기">×</button>
+        <h2 class="modal-title" id="inventoryDetailTitle">분석 상세</h2>
+        <div class="modal-body" id="inventoryDetailBody">
+          <!-- JS가 채움 -->
+        </div>
+        <div class="modal-footer">
+          <button class="modal-close-large" id="inventoryDetailCloseLarge" type="button">닫기</button>
+        </div>
+      </div>
     </div>
 
     <!-- 분석 저장 완료 모달 -->
