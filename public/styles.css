@@ -962,3 +962,328 @@ tbody tr:hover {
     min-width: 0;
   }
 }
+
+/* ===== 분석표 탭 — 4단계 OCR 자동 계산 (2026-06-19) ===== */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.analysis-step {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.step-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-soft, #e6ebef);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.step-head h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--green, #157a5b);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.confidence-pill {
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f0f4f7;
+  color: #4b5563;
+}
+
+.confidence-pill.high { background: #d1fae5; color: #065f46; }
+.confidence-pill.mid  { background: #fef3c7; color: #92400e; }
+.confidence-pill.low  { background: #fee2e2; color: #991b1b; }
+
+/* 업로드 영역 */
+.upload-zone {
+  position: relative;
+  min-height: 180px;
+  border: 2px dashed #9eb0bd;
+  border-radius: 10px;
+  background: var(--surface-soft, #f6f8fa);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+  border-color: var(--green, #157a5b);
+  background: #ecfdf5;
+}
+
+.upload-hint {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: 8px;
+  border: 1px solid var(--border-soft, #e6ebef);
+  display: block;
+  margin: 0 auto;
+}
+
+.upload-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.upload-actions .primary-action { flex: 1; }
+.upload-actions .secondary-action {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.ocr-status {
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin: 0;
+}
+.ocr-status.info    { background: #eff6ff; color: #1e40af; }
+.ocr-status.success { background: #d1fae5; color: #065f46; }
+.ocr-status.error   { background: #fee2e2; color: #991b1b; }
+
+/* 추출 결과 폼 */
+.extract-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.field > span {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.field input {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--green, #157a5b);
+  box-shadow: 0 0 0 3px rgba(21, 122, 91, 0.15);
+}
+
+.extract-table-wrap h3 {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+}
+
+.extract-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.extract-table th,
+.extract-table td {
+  padding: 6px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-soft, #e6ebef);
+}
+
+.extract-table th {
+  background: var(--surface-soft, #f6f8fa);
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.extract-table input {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.extract-table input:hover { border-color: #d1d5db; }
+.extract-table input:focus { border-color: var(--green, #157a5b); outline: none; }
+
+.extract-table .delete-btn {
+  background: none;
+  border: 0;
+  color: #9ca3af;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+}
+
+.extract-table .delete-btn:hover { color: #dc2626; }
+
+.text-button {
+  background: none;
+  border: 0;
+  color: var(--green, #157a5b);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+  font-size: 13px;
+}
+
+.moisture-field { max-width: 200px; }
+
+/* 계산 조건 */
+.pay-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface-soft, #f6f8fa);
+  border-radius: 8px;
+}
+
+.pay-rate-row {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.pay-rate-row label { color: #374151; font-weight: 600; }
+.pay-rate-row input {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  text-align: right;
+}
+
+.readonly-pill-row {
+  display: flex;
+  gap: 8px;
+}
+
+.readonly-pill {
+  flex: 1;
+  background: var(--surface-soft, #f6f8fa);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.readonly-pill span { font-size: 12px; color: #6b7280; font-weight: 600; }
+.readonly-pill strong { font-size: 16px; }
+
+.small-note {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* 계산 결과 */
+.analysis-result {
+  grid-column: 1 / -1;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.result-table th,
+.result-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-soft, #e6ebef);
+  text-align: right;
+}
+
+.result-table th:first-child,
+.result-table td:first-child { text-align: left; font-weight: 600; }
+
+.result-table th {
+  background: var(--surface-soft, #f6f8fa);
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.result-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.summary-card {
+  background: var(--surface-soft, #f6f8fa);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-card span {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.summary-card strong {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.summary-card.accent {
+  background: var(--green, #157a5b);
+  color: #fff;
+}
+
+.summary-card.accent span { color: rgba(255, 255, 255, 0.85); }
+
+@media (max-width: 880px) {
+  .analysis-grid { grid-template-columns: 1fr; }
+  .extract-meta { grid-template-columns: 1fr; }
+  .result-summary-grid { grid-template-columns: 1fr; }
+}

@@ -212,13 +212,20 @@ let commodities = [
   }
 ];
 
-const sampleAnalysis = [
-  { symbol: "Co", recognized: "Cobalt 99.8", content: "8.2%", weightKg: 120, confidence: 0.96 },
-  { symbol: "Ni", recognized: "Nickel", content: "14.5%", weightKg: 210, confidence: 0.94 },
-  { symbol: "Li", recognized: "Li2CO3", content: "확인필요", weightKg: 32, confidence: 0.61 },
-  { symbol: "Cu", recognized: "Copper", content: "3.4%", weightKg: 85, confidence: 0.91 },
-  { symbol: "Al", recognized: "Aluminium", content: "6.1%", weightKg: 140, confidence: 0.89 }
-];
+// 분석표 탭 상태 (이미지 + OCR 추출 + 지불률 + 계산 결과)
+const analysisState = {
+  imageDataUrl: null,
+  extract: {
+    metals: [],
+    moisture: null,
+    sampleName: "",
+    reportNumber: "",
+    testDate: "",
+    issuer: "",
+    confidence: null
+  },
+  payRates: {} // { symbol: 100 }
+};
 
 const els = {
   updatedAt: document.querySelector("#updatedAt"),
@@ -251,11 +258,28 @@ const els = {
   welcomePrevMonthUsdHeader: document.querySelector("#welcomePrevMonthUsdHeader"),
   welcomePrevMonthKrwHeader: document.querySelector("#welcomePrevMonthKrwHeader"),
   analysisFile: document.querySelector("#analysisFile"),
-  fileLabel: document.querySelector("#fileLabel"),
-  runAnalysis: document.querySelector("#runAnalysis"),
-  analysisTotal: document.querySelector("#analysisTotal"),
-  analysisSummary: document.querySelector("#analysisSummary"),
-  analysisRows: document.querySelector("#analysisRows"),
+  uploadZone: document.querySelector(".upload-zone"),
+  uploadHint: document.querySelector("#uploadHint"),
+  previewImage: document.querySelector("#previewImage"),
+  runOcrBtn: document.querySelector("#runOcrBtn"),
+  clearUploadBtn: document.querySelector("#clearUploadBtn"),
+  ocrStatus: document.querySelector("#ocrStatus"),
+  exSample: document.querySelector("#exSample"),
+  exReport: document.querySelector("#exReport"),
+  exDate: document.querySelector("#exDate"),
+  exIssuer: document.querySelector("#exIssuer"),
+  exConfidence: document.querySelector("#exConfidence"),
+  exMoisture: document.querySelector("#exMoisture"),
+  extractMetalsRows: document.querySelector("#extractMetalsRows"),
+  addMetalBtn: document.querySelector("#addMetalBtn"),
+  totalQuantity: document.querySelector("#totalQuantity"),
+  payRatesContainer: document.querySelector("#payRatesContainer"),
+  calcExchange: document.querySelector("#calcExchange"),
+  calculateBtn: document.querySelector("#calculateBtn"),
+  resultRows: document.querySelector("#resultRows"),
+  resultTotal: document.querySelector("#resultTotal"),
+  resultUsdPerKg: document.querySelector("#resultUsdPerKg"),
+  resultKrwPerKg: document.querySelector("#resultKrwPerKg"),
   addCommodityForm: document.querySelector("#addCommodityForm"),
   newName: document.querySelector("#newName"),
   newSymbol: document.querySelector("#newSymbol"),
@@ -645,38 +669,282 @@ function hideChartTooltip() {
   els.chartTooltip.hidden = true;
 }
 
-function renderAnalysis(rows = []) {
-  if (!rows.length) {
-    els.analysisRows.innerHTML = `
-      <tr>
-        <td colspan="7">분석표 자동정리를 실행하면 인식 결과가 표시됩니다.</td>
-      </tr>
-    `;
+// ===== 분석표 탭 — OCR + 계산 로직 =====
+
+function setOcrStatus(message, kind = "info") {
+  if (!message) {
+    els.ocrStatus.hidden = true;
+    els.ocrStatus.textContent = "";
     return;
   }
+  els.ocrStatus.hidden = false;
+  els.ocrStatus.className = `ocr-status ${kind}`;
+  els.ocrStatus.textContent = message;
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("파일 읽기 실패"));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleFileSelected(file) {
+  if (!file) return;
+  if (!file.type.startsWith("image/")) {
+    setOcrStatus("이미지 파일만 업로드 가능합니다 (JPG, PNG, WEBP)", "error");
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    setOcrStatus("이미지가 너무 큽니다 (5MB 이하 권장)", "error");
+    return;
+  }
+  try {
+    const dataUrl = await fileToDataUrl(file);
+    analysisState.imageDataUrl = dataUrl;
+    els.previewImage.src = dataUrl;
+    els.previewImage.hidden = false;
+    els.uploadHint.hidden = true;
+    els.runOcrBtn.disabled = false;
+    els.clearUploadBtn.hidden = false;
+    setOcrStatus("OCR 분석 실행 버튼을 눌러주세요", "info");
+  } catch (e) {
+    setOcrStatus(e.message, "error");
+  }
+}
+
+function clearUpload() {
+  analysisState.imageDataUrl = null;
+  els.analysisFile.value = "";
+  els.previewImage.src = "";
+  els.previewImage.hidden = true;
+  els.uploadHint.hidden = false;
+  els.runOcrBtn.disabled = true;
+  els.clearUploadBtn.hidden = true;
+  setOcrStatus("");
+}
+
+async function runOcr() {
+  if (!analysisState.imageDataUrl) return;
+  els.runOcrBtn.disabled = true;
+  setOcrStatus("Claude Vision 분석 중... (5~10초)", "info");
+
+  try {
+    const res = await fetch("/api/ocr-analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: analysisState.imageDataUrl })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || `HTTP ${res.status}`);
+    }
+    applyExtractedData(data);
+    setOcrStatus("추출 완료. 결과를 확인하고 필요시 수정해주세요.", "success");
+  } catch (e) {
+    console.error("[OCR] 실패:", e);
+    setOcrStatus(`OCR 실패: ${e.message}`, "error");
+  } finally {
+    els.runOcrBtn.disabled = false;
+  }
+}
+
+function applyExtractedData(data) {
+  analysisState.extract = {
+    metals: (data.metals || []).map((m) => ({
+      name: m.name || "",
+      symbol: m.symbol || "",
+      contentPercent: m.content_percent ?? (m.content_mg_per_kg != null ? m.content_mg_per_kg / 10000 : null),
+      contentMgPerKg: m.content_mg_per_kg ?? (m.content_percent != null ? m.content_percent * 10000 : null)
+    })),
+    moisture: data.moisture_percent ?? null,
+    sampleName: data.sample_name || "",
+    reportNumber: data.report_number || "",
+    testDate: data.test_date || "",
+    issuer: data.issuer || "",
+    confidence: data.confidence ?? null
+  };
+
+  els.exSample.value = analysisState.extract.sampleName;
+  els.exReport.value = analysisState.extract.reportNumber;
+  els.exDate.value = analysisState.extract.testDate;
+  els.exIssuer.value = analysisState.extract.issuer;
+  els.exMoisture.value = analysisState.extract.moisture ?? "";
+
+  renderConfidence(analysisState.extract.confidence);
+  renderExtractMetals();
+  renderPayRates();
+  els.calculateBtn.disabled = analysisState.extract.metals.length === 0;
+}
+
+function renderConfidence(c) {
+  if (c == null) {
+    els.exConfidence.hidden = true;
+    return;
+  }
+  els.exConfidence.hidden = false;
+  const pct = Math.round(c * 100);
+  els.exConfidence.textContent = `신뢰도 ${pct}%`;
+  els.exConfidence.classList.remove("high", "mid", "low");
+  els.exConfidence.classList.add(pct >= 90 ? "high" : pct >= 70 ? "mid" : "low");
+}
+
+function renderExtractMetals() {
+  const rows = analysisState.extract.metals;
+  if (!rows.length) {
+    els.extractMetalsRows.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:14px">메탈 항목 없음 — 추가 버튼으로 입력</td></tr>`;
+    return;
+  }
+  els.extractMetalsRows.innerHTML = "";
+  rows.forEach((metal, idx) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><input data-idx="${idx}" data-field="name" type="text" value="${metal.name || ""}" /></td>
+      <td><input data-idx="${idx}" data-field="symbol" type="text" value="${metal.symbol || ""}" style="text-transform:none" /></td>
+      <td><input data-idx="${idx}" data-field="contentPercent" type="number" step="0.0001" value="${metal.contentPercent ?? ""}" /></td>
+      <td><input data-idx="${idx}" data-field="contentMgPerKg" type="number" step="1" value="${metal.contentMgPerKg ?? ""}" /></td>
+      <td><button class="delete-btn" data-delete-idx="${idx}" type="button" aria-label="삭제">×</button></td>
+    `;
+    els.extractMetalsRows.appendChild(tr);
+  });
+}
+
+function onExtractInputChange(event) {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement)) return;
+  const idx = Number(target.dataset.idx);
+  const field = target.dataset.field;
+  if (!Number.isFinite(idx) || !field) return;
+  const metal = analysisState.extract.metals[idx];
+  if (!metal) return;
+  if (field === "contentPercent") {
+    const v = target.value === "" ? null : Number(target.value);
+    metal.contentPercent = v;
+    metal.contentMgPerKg = v != null ? v * 10000 : null;
+    const mgInput = els.extractMetalsRows.querySelector(`input[data-idx="${idx}"][data-field="contentMgPerKg"]`);
+    if (mgInput) mgInput.value = metal.contentMgPerKg ?? "";
+  } else if (field === "contentMgPerKg") {
+    const v = target.value === "" ? null : Number(target.value);
+    metal.contentMgPerKg = v;
+    metal.contentPercent = v != null ? v / 10000 : null;
+    const pInput = els.extractMetalsRows.querySelector(`input[data-idx="${idx}"][data-field="contentPercent"]`);
+    if (pInput) pInput.value = metal.contentPercent ?? "";
+  } else {
+    metal[field] = target.value;
+    if (field === "symbol") renderPayRates();
+  }
+}
+
+function onExtractDeleteClick(event) {
+  const btn = event.target.closest("button.delete-btn");
+  if (!btn) return;
+  const idx = Number(btn.dataset.deleteIdx);
+  analysisState.extract.metals.splice(idx, 1);
+  renderExtractMetals();
+  renderPayRates();
+  els.calculateBtn.disabled = analysisState.extract.metals.length === 0;
+}
+
+function addMetalRow() {
+  analysisState.extract.metals.push({
+    name: "",
+    symbol: "",
+    contentPercent: null,
+    contentMgPerKg: null
+  });
+  renderExtractMetals();
+  renderPayRates();
+  els.calculateBtn.disabled = false;
+}
+
+function renderPayRates() {
+  const metals = analysisState.extract.metals.filter((m) => m.symbol);
+  if (!metals.length) {
+    els.payRatesContainer.innerHTML = `<p class="small-note">OCR 추출 후 메탈별 지불률(%) 입력란이 자동 생성됩니다.</p>`;
+    return;
+  }
+  els.payRatesContainer.innerHTML = "";
+  metals.forEach((metal) => {
+    if (analysisState.payRates[metal.symbol] == null) {
+      analysisState.payRates[metal.symbol] = 100;
+    }
+    const row = document.createElement("div");
+    row.className = "pay-rate-row";
+    row.innerHTML = `
+      <label>${metal.name || metal.symbol} (${metal.symbol}) 지불률</label>
+      <input type="number" step="0.01" min="0" max="100" data-symbol="${metal.symbol}" value="${analysisState.payRates[metal.symbol]}" />
+    `;
+    els.payRatesContainer.appendChild(row);
+  });
+}
+
+function onPayRateChange(event) {
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement) || !target.dataset.symbol) return;
+  const v = Number(target.value);
+  if (Number.isFinite(v)) analysisState.payRates[target.dataset.symbol] = v;
+}
+
+function calculateAnalysis() {
+  const totalQty = Number(els.totalQuantity.value);
+  if (!Number.isFinite(totalQty) || totalQty <= 0) {
+    setOcrStatus("총 수량을 입력해주세요", "error");
+    return;
+  }
+  const moisture = Number(els.exMoisture.value) || 0;
+  const dryFactor = 1 - moisture / 100;
 
   let total = 0;
-  els.analysisRows.innerHTML = rows.map((row) => {
-    const item = commodities.find((commodity) => commodity.symbol === row.symbol);
-    const amount = item ? krwPrice(item.usd) * row.weightKg : 0;
-    const status = row.confidence >= 0.85 ? "ok" : "warn";
-    total += status === "ok" ? amount : 0;
+  const rows = [];
 
-    return `
-      <tr>
-        <td><strong>${row.symbol}</strong></td>
-        <td>${row.recognized}</td>
-        <td>${row.content}</td>
-        <td>${row.weightKg.toLocaleString("ko-KR")}kg</td>
-        <td>${item ? formatter.krw(krwPrice(item.usd)) : "-"}</td>
-        <td>${status === "ok" ? formatter.krw(amount) : "검토 필요"}</td>
-        <td><span class="status-pill ${status}">${status === "ok" ? "확정" : "검토"}</span></td>
-      </tr>
-    `;
-  }).join("");
+  analysisState.extract.metals.forEach((metal) => {
+    if (!metal.symbol || metal.contentPercent == null) return;
+    const item = commodities.find((c) => c.symbol === metal.symbol);
+    const usdPrice = item?.usd ?? null;
+    const payRate = analysisState.payRates[metal.symbol] ?? 100;
+    const metalKg = totalQty * (metal.contentPercent / 100) * dryFactor;
+    const amount = usdPrice != null ? metalKg * usdPrice * (payRate / 100) : 0;
+    total += amount;
+    rows.push({
+      symbol: metal.symbol,
+      name: metal.name || metal.symbol,
+      contentPercent: metal.contentPercent,
+      metalKg,
+      usdPrice,
+      payRate,
+      amount
+    });
+  });
 
-  els.analysisTotal.textContent = formatter.krw(total);
-  els.analysisSummary.textContent = `USD/KRW ${exchangeRate.toLocaleString("ko-KR")} 적용 · ${rows.length}개 항목 인식 · 검토 ${rows.filter((row) => row.confidence < 0.85).length}건`;
+  els.resultRows.innerHTML = rows.map((r) => `
+    <tr>
+      <td><strong>${r.name}</strong> <small style="color:#9ca3af">${r.symbol}</small></td>
+      <td>${r.contentPercent.toFixed(4)}%</td>
+      <td>${r.metalKg.toFixed(2)} kg</td>
+      <td>${r.usdPrice != null ? `$${r.usdPrice.toLocaleString("en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}` : `<span style="color:#dc2626">시세 없음</span>`}</td>
+      <td>${r.payRate.toFixed(1)}%</td>
+      <td>${r.amount > 0 ? `$${r.amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "-"}</td>
+    </tr>
+  `).join("");
+
+  const usdPerKg = totalQty > 0 ? total / totalQty : 0;
+  const krwPerKg = usdPerKg * exchangeRate;
+
+  els.resultTotal.textContent = `$${total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  els.resultUsdPerKg.textContent = `$${usdPerKg.toFixed(2)}`;
+  els.resultKrwPerKg.textContent = formatter.krw(krwPerKg);
+  els.calcExchange.textContent = `₩${exchangeRate.toLocaleString("ko-KR")}`;
+  setOcrStatus("계산 완료", "success");
+}
+
+function resetAnalysisResults() {
+  els.resultRows.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#9ca3af;padding:14px">"계산 실행" 버튼을 누르면 결과가 표시됩니다</td></tr>`;
+  els.resultTotal.textContent = "-";
+  els.resultUsdPerKg.textContent = "-";
+  els.resultKrwPerKg.textContent = "-";
+  els.calcExchange.textContent = `₩${exchangeRate.toLocaleString("ko-KR")}`;
 }
 
 function setView(viewName) {
@@ -782,12 +1050,39 @@ document.querySelectorAll(".period-tabs button").forEach((button) => {
   });
 });
 
+// 분석표 탭 — 이벤트 바인딩
 els.analysisFile.addEventListener("change", () => {
-  const file = els.analysisFile.files[0];
-  els.fileLabel.textContent = file ? file.name : "파일을 선택하거나 촬영하세요";
+  handleFileSelected(els.analysisFile.files[0]);
 });
 
-els.runAnalysis.addEventListener("click", () => renderAnalysis(sampleAnalysis));
+els.uploadZone.addEventListener("click", () => els.analysisFile.click());
+els.uploadZone.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  els.uploadZone.classList.add("dragover");
+});
+els.uploadZone.addEventListener("dragleave", () => {
+  els.uploadZone.classList.remove("dragover");
+});
+els.uploadZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  els.uploadZone.classList.remove("dragover");
+  handleFileSelected(e.dataTransfer.files[0]);
+});
+
+els.runOcrBtn.addEventListener("click", runOcr);
+els.clearUploadBtn.addEventListener("click", clearUpload);
+els.addMetalBtn.addEventListener("click", addMetalRow);
+els.calculateBtn.addEventListener("click", calculateAnalysis);
+els.extractMetalsRows.addEventListener("input", onExtractInputChange);
+els.extractMetalsRows.addEventListener("click", onExtractDeleteClick);
+els.payRatesContainer.addEventListener("input", onPayRateChange);
+els.exMoisture.addEventListener("input", (e) => {
+  analysisState.extract.moisture = e.target.value === "" ? null : Number(e.target.value);
+});
+els.exSample.addEventListener("input", (e) => { analysisState.extract.sampleName = e.target.value; });
+els.exReport.addEventListener("input", (e) => { analysisState.extract.reportNumber = e.target.value; });
+els.exDate.addEventListener("input", (e) => { analysisState.extract.testDate = e.target.value; });
+els.exIssuer.addEventListener("input", (e) => { analysisState.extract.issuer = e.target.value; });
 
 els.addCommodityForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -846,7 +1141,9 @@ if (els.welcomeModal) {
 updateTime();
 updateMonthlyAvgLabels();
 renderAll();
-renderAnalysis();
+renderExtractMetals();
+renderPayRates();
+resetAnalysisResults();
 loadLivePrices();
 
 // 페이지 첫 진입 시 모달 표시 (대시보드 위에 오버레이)
