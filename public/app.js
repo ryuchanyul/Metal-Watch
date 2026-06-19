@@ -1055,7 +1055,7 @@ els.analysisFile.addEventListener("change", () => {
   handleFileSelected(els.analysisFile.files[0]);
 });
 
-els.uploadZone.addEventListener("click", () => els.analysisFile.click());
+// label 자체가 input을 여는 native 동작 — JS에서 click() 추가 호출 시 다이얼로그가 2번 뜸
 els.uploadZone.addEventListener("dragover", (e) => {
   e.preventDefault();
   els.uploadZone.classList.add("dragover");
