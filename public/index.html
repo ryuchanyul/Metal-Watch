@@ -152,7 +152,7 @@
               </div>
             </article>
 
-            <!-- 3. 계산표 (탭) -->
+            <!-- 3. 계산표 (탭) + 저장 -->
             <article class="panel analysis-step calc-panel">
               <div class="step-head"><span class="step-num">3</span><h2>계산표</h2></div>
               <div class="calc-tabs" role="tablist">
@@ -201,6 +201,7 @@
               </div>
 
               <!-- 탭 B -->
+              <!-- (탭 B는 아래에 정의됨) -->
               <div class="calc-tab-panel" data-panel="B" role="tabpanel" hidden>
                 <div class="calc-table-wrap">
                   <table class="calc-table" id="calcTableB">
@@ -239,6 +240,20 @@
                   </div>
                 </div>
               </div>
+            </article>
+
+            <!-- 4. 저장 -->
+            <article class="panel analysis-step analysis-save-panel">
+              <div class="step-head"><span class="step-num">4</span><h2>분석 저장</h2></div>
+              <label class="field">
+                <span>메모 (선택)</span>
+                <textarea id="analysisNotes" rows="2" placeholder="예: 6월 입고분, 거래처 OOO, 재고 등록 필요" style="resize:vertical;min-height:48px"></textarea>
+              </label>
+              <div class="save-actions">
+                <button id="saveAnalysisBtn" class="primary-action">분석 저장</button>
+                <p class="save-hint">저장 시점의 시세/환율도 함께 보관됩니다. 향후 재고/ERP 연계에 사용됩니다.</p>
+              </div>
+              <p class="ocr-status" id="saveStatus" hidden></p>
             </article>
           </div>
         </section>
@@ -285,6 +300,17 @@
           </div>
         </section>
       </main>
+    </div>
+
+    <!-- 분석 저장 완료 모달 -->
+    <div class="modal-overlay" id="saveSuccessModal" role="dialog" aria-modal="true" aria-labelledby="saveSuccessTitle" hidden>
+      <div class="modal-panel save-success-panel" role="document">
+        <div class="save-success-icon" aria-hidden="true">✓</div>
+        <h2 class="modal-title" id="saveSuccessTitle">저장 완료</h2>
+        <p class="save-success-text">분석 결과가 보관되었습니다.</p>
+        <p class="save-success-id">ID: <code id="savedAnalysisId">-</code></p>
+        <button id="saveSuccessClose" class="modal-close-large" type="button">확인</button>
+      </div>
     </div>
 
     <!-- OCR 분석 진행 모달 -->

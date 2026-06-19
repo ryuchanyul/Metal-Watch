@@ -286,6 +286,12 @@ const els = {
   calcPanels: document.querySelectorAll(".calc-tab-panel"),
   calcTableA: document.querySelector("#calcTableA"),
   calcTableB: document.querySelector("#calcTableB"),
+  analysisNotes: document.querySelector("#analysisNotes"),
+  saveAnalysisBtn: document.querySelector("#saveAnalysisBtn"),
+  saveStatus: document.querySelector("#saveStatus"),
+  saveSuccessModal: document.querySelector("#saveSuccessModal"),
+  saveSuccessClose: document.querySelector("#saveSuccessClose"),
+  savedAnalysisId: document.querySelector("#savedAnalysisId"),
   addCommodityForm: document.querySelector("#addCommodityForm"),
   newName: document.querySelector("#newName"),
   newSymbol: document.querySelector("#newSymbol"),
@@ -1009,6 +1015,115 @@ function onCalcMetalDelete(event) {
   renderCalcTable(tabId);
 }
 
+// ===== 분석 저장 =====
+function setSaveStatus(message, kind = "info") {
+  if (!els.saveStatus) return;
+  if (!message) {
+    els.saveStatus.hidden = true;
+    els.saveStatus.textContent = "";
+    return;
+  }
+  els.saveStatus.hidden = false;
+  els.saveStatus.className = `ocr-status ${kind}`;
+  els.saveStatus.textContent = message;
+}
+
+function computeTabResults(tabId) {
+  // 현재 화면에 표시된 계산 결과를 추출 (recalc과 동일 로직, 결과만 반환)
+  const tab = analysisState.tabs[tabId];
+  const dryFactor = 1 - (Number(tab.moisture) || 0) / 100;
+  const totalQty = Number(tab.totalQty) || 0;
+  let totalUsd = 0;
+  const lines = [];
+  tab.metals.forEach((m) => {
+    const content = Number(m.content);
+    const item = commodities.find((c) => c.symbol === m.symbol);
+    const price = item?.usd ?? null;
+    const payRate = Number(tab.payRates[m.symbol] ?? 100);
+    const metalKg = Number.isFinite(content) ? totalQty * (content / 100) * dryFactor : null;
+    const amount = (metalKg != null && price != null) ? metalKg * price * (payRate / 100) : null;
+    if (amount != null) totalUsd += amount;
+    lines.push({
+      symbol: m.symbol,
+      name: m.name,
+      content,
+      metalKg,
+      price,
+      payRate,
+      amount
+    });
+  });
+  const usdPerKg = totalQty > 0 ? totalUsd / totalQty : 0;
+  const krwPerKg = usdPerKg * exchangeRate;
+  return { lines, totalUsd, usdPerKg, krwPerKg };
+}
+
+function getPricesSnapshot() {
+  // 양쪽 탭에 등장한 메탈 심볼별 현재 시세 저장
+  const symbols = new Set();
+  ["A", "B"].forEach((tabId) => {
+    analysisState.tabs[tabId].metals.forEach((m) => {
+      if (m.symbol) symbols.add(m.symbol);
+    });
+  });
+  const snapshot = {};
+  symbols.forEach((sym) => {
+    const item = commodities.find((c) => c.symbol === sym);
+    if (item?.usd != null) snapshot[sym] = item.usd;
+  });
+  return snapshot;
+}
+
+async function saveAnalysis() {
+  els.saveAnalysisBtn.disabled = true;
+  setSaveStatus("저장 중...", "info");
+  try {
+    const body = {
+      sample_name: analysisState.meta.sampleName || null,
+      report_number: analysisState.meta.reportNumber || null,
+      test_date: analysisState.meta.testDate || null,
+      issuer: analysisState.meta.issuer || null,
+      ocr_confidence: analysisState.meta.confidence,
+      exchange_rate_snapshot: exchangeRate,
+      prices_snapshot: getPricesSnapshot(),
+      tabs: {
+        A: { ...analysisState.tabs.A, results: computeTabResults("A") },
+        B: { ...analysisState.tabs.B, results: computeTabResults("B") }
+      },
+      notes: els.analysisNotes.value || null
+    };
+    const res = await fetch("/api/analysis/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.message || data.error || `HTTP ${res.status}`);
+    }
+    setSaveStatus("저장 완료!", "success");
+    openSaveSuccessModal(data.id);
+  } catch (e) {
+    console.error("[save] 실패:", e);
+    setSaveStatus(`저장 실패: ${e.message}`, "error");
+  } finally {
+    els.saveAnalysisBtn.disabled = false;
+  }
+}
+
+function openSaveSuccessModal(id) {
+  if (!els.saveSuccessModal) return;
+  if (els.savedAnalysisId) els.savedAnalysisId.textContent = id || "-";
+  els.saveSuccessModal.hidden = false;
+  els.saveSuccessModal.classList.add("open");
+}
+
+function closeSaveSuccessModal() {
+  if (!els.saveSuccessModal) return;
+  els.saveSuccessModal.classList.remove("open");
+  els.saveSuccessModal.hidden = true;
+}
+
 function switchTab(tabId) {
   if (!analysisState.tabs[tabId]) return;
   analysisState.activeTab = tabId;
@@ -1167,6 +1282,19 @@ els.calcPanels.forEach((panel) => {
   panel.addEventListener("input", onCalcTableInput);
   panel.addEventListener("click", onCalcMetalDelete);
 });
+
+// 저장 버튼 + 저장 완료 모달
+if (els.saveAnalysisBtn) {
+  els.saveAnalysisBtn.addEventListener("click", saveAnalysis);
+}
+if (els.saveSuccessClose) {
+  els.saveSuccessClose.addEventListener("click", closeSaveSuccessModal);
+}
+if (els.saveSuccessModal) {
+  els.saveSuccessModal.addEventListener("click", (event) => {
+    if (event.target === els.saveSuccessModal) closeSaveSuccessModal();
+  });
+}
 
 els.addCommodityForm.addEventListener("submit", (event) => {
   event.preventDefault();

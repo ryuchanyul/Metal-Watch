@@ -1734,3 +1734,80 @@ tbody tr:hover {
 .camera-btn[hidden] {
   display: none;
 }
+
+/* ===== 분석 저장 패널 + 완료 모달 ===== */
+.analysis-save-panel textarea {
+  width: 100%;
+  border: 1px solid var(--line, #dbe3e8);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.analysis-save-panel textarea:focus {
+  outline: none;
+  border-color: var(--green, #157a5b);
+  box-shadow: 0 0 0 3px rgba(21, 122, 91, 0.15);
+}
+
+.save-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.save-actions .primary-action {
+  min-width: 160px;
+}
+
+.save-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted, #6d7b88);
+  flex: 1;
+}
+
+.save-success-panel {
+  width: min(380px, 100%);
+  text-align: center;
+  padding: 32px 28px 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.save-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #d1fae5;
+  color: #065f46;
+  display: grid;
+  place-items: center;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.save-success-text {
+  margin: 4px 0 0;
+  color: #374151;
+  font-size: 14px;
+}
+
+.save-success-id {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted, #6d7b88);
+}
+
+.save-success-id code {
+  font-size: 11px;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
