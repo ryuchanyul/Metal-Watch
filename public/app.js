@@ -703,18 +703,54 @@ function fileToDataUrl(file) {
   });
 }
 
+// 큰 이미지를 캔버스로 리사이즈 (단변 maxDim 이하, JPEG 압축)
+function resizeDataUrl(dataUrl, maxDim = 1920, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      const longSide = Math.max(width, height);
+      if (longSide > maxDim) {
+        const scale = maxDim / longSide;
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      try {
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      } catch (e) {
+        reject(e);
+      }
+    };
+    img.onerror = () => reject(new Error("이미지 리사이즈 실패"));
+    img.src = dataUrl;
+  });
+}
+
 async function handleFileSelected(file) {
   if (!file) return;
   if (!file.type.startsWith("image/")) {
     setOcrStatus("이미지 파일만 업로드 가능합니다 (JPG, PNG, WEBP)", "error");
     return;
   }
-  if (file.size > 5 * 1024 * 1024) {
-    setOcrStatus("이미지가 너무 큽니다 (5MB 이하 권장)", "error");
+  if (file.size > 10 * 1024 * 1024) {
+    setOcrStatus("이미지가 너무 큽니다 (10MB 이하)", "error");
     return;
   }
   try {
-    const dataUrl = await fileToDataUrl(file);
+    let dataUrl = await fileToDataUrl(file);
+    // Vercel POST body 제한(4.5MB) 회피 + OCR 속도 향상 — 1.5MB 초과 시 자동 리사이즈
+    if (file.size > 1.5 * 1024 * 1024) {
+      try {
+        dataUrl = await resizeDataUrl(dataUrl, 1920, 0.85);
+      } catch (e) {
+        console.warn("리사이즈 실패, 원본 사용:", e);
+      }
+    }
     analysisState.imageDataUrl = dataUrl;
     els.previewImage.src = dataUrl;
     els.previewImage.hidden = false;
