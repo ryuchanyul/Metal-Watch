@@ -1441,11 +1441,12 @@ tbody tr:hover {
 
 .calc-table th,
 .calc-table td {
-  padding: 8px 10px;
+  padding: 14px 12px;
   border: 1px solid var(--line, #dbe3e8);
   text-align: center;
   white-space: nowrap;
   font-weight: 600;
+  font-size: 15px;
 }
 
 .calc-table thead th {
@@ -1469,33 +1470,42 @@ tbody tr:hover {
   width: 110px;
 }
 
-/* 입력 가능 행 (함량, 수분, 지불률) — 노란 배경 강조 */
+/* 입력 가능 행 (함량, 수분, 지불률) — 노란 행 배경 + 흰 input 박스로 시각 차별화 */
 .calc-table .row-input td {
   background: #fff35a;
   color: #15202b;
   font-weight: 800;
+  padding: 10px 10px;
 }
 
 .calc-table .row-input td input {
   width: 100%;
-  border: 1px solid transparent;
-  background: transparent;
-  padding: 2px 4px;
-  font-size: 14px;
+  border: 2px solid #b8a318;
+  background: #ffffff;
+  padding: 10px 10px;
+  font-size: 15px;
   font-weight: 800;
   text-align: center;
   color: #15202b;
+  border-radius: 6px;
+  cursor: text;
+  min-height: 42px;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.calc-table .row-input td input:hover {
+  border-color: var(--green, #157a5b);
 }
 
 .calc-table .row-input td input:focus {
   outline: none;
   border-color: var(--green, #157a5b);
-  background: #fffabf;
-  box-shadow: 0 0 0 2px rgba(21, 122, 91, 0.2);
+  background: #f0fdf4;
+  box-shadow: 0 0 0 3px rgba(21, 122, 91, 0.25);
 }
 
 .calc-table .row-input td input::placeholder {
-  color: #8a8a4a;
+  color: #b0b06a;
   font-weight: 600;
 }
 
@@ -1610,19 +1620,27 @@ tbody tr:hover {
 }
 
 .summary-cell.summary-input > input {
-  border: 1px solid #d4c930;
-  border-radius: 4px;
-  padding: 6px 8px;
-  font-size: 16px;
+  border: 2px solid #b8a318;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 18px;
   font-weight: 800;
   text-align: right;
-  background: #fffeed;
+  background: #ffffff;
+  cursor: text;
+  min-height: 48px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.summary-cell.summary-input > input:hover {
+  border-color: var(--green, #157a5b);
 }
 
 .summary-cell.summary-input > input:focus {
   outline: none;
   border-color: var(--green, #157a5b);
-  box-shadow: 0 0 0 2px rgba(21, 122, 91, 0.2);
+  background: #f0fdf4;
+  box-shadow: 0 0 0 3px rgba(21, 122, 91, 0.25);
 }
 
 .summary-cell.summary-calc {
