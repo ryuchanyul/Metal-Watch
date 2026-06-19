@@ -135,69 +135,103 @@
               <p class="ocr-status" id="ocrStatus" hidden></p>
             </article>
 
-            <!-- 2. 추출 결과 (편집 가능) -->
+            <!-- 2. 시료 정보 (OCR 메타) -->
             <article class="panel analysis-step">
-              <div class="step-head"><span class="step-num">2</span><h2>추출 결과 (수정 가능)</h2><span class="confidence-pill" id="exConfidence" hidden>-</span></div>
+              <div class="step-head"><span class="step-num">2</span><h2>시료 정보 (수정 가능)</h2><span class="confidence-pill" id="exConfidence" hidden>-</span></div>
               <div class="extract-meta">
                 <label class="field"><span>시료명</span><input id="exSample" type="text" placeholder="예: 니켈 슬러지 (A)" /></label>
                 <label class="field"><span>성적서번호</span><input id="exReport" type="text" placeholder="예: TAK-2026-062853" /></label>
                 <label class="field"><span>시험완료일</span><input id="exDate" type="date" /></label>
                 <label class="field"><span>발급기관</span><input id="exIssuer" type="text" placeholder="예: KTR" /></label>
               </div>
-              <div class="extract-table-wrap">
-                <h3>메탈 함량</h3>
-                <table class="extract-table">
-                  <thead>
-                    <tr><th>메탈명</th><th>심볼</th><th>함량(%)</th><th>mg/kg</th><th></th></tr>
-                  </thead>
-                  <tbody id="extractMetalsRows"></tbody>
-                </table>
-                <button id="addMetalBtn" class="text-button">+ 메탈 항목 추가</button>
-              </div>
-              <label class="field moisture-field">
-                <span>수분 (%)</span>
-                <input id="exMoisture" type="number" step="0.01" min="0" max="100" placeholder="예: 11.6" />
-              </label>
             </article>
 
-            <!-- 3. 계산 조건 -->
-            <article class="panel analysis-step">
-              <div class="step-head"><span class="step-num">3</span><h2>계산 조건</h2></div>
-              <label class="field">
-                <span>총 수량 (kg)</span>
-                <input id="totalQuantity" type="number" step="0.1" min="0" value="1000" />
-              </label>
-              <div class="pay-rates" id="payRatesContainer">
-                <p class="small-note">OCR 추출 후 메탈별 지불률(%) 입력란이 자동 생성됩니다.</p>
+            <!-- 3. 계산표 (탭) -->
+            <article class="panel analysis-step calc-panel">
+              <div class="step-head"><span class="step-num">3</span><h2>계산표</h2></div>
+              <div class="calc-tabs" role="tablist">
+                <button class="calc-tab active" data-tab="A" type="button" role="tab" aria-selected="true">습식 A</button>
+                <button class="calc-tab" data-tab="B" type="button" role="tab" aria-selected="false">습식 B</button>
               </div>
-              <div class="readonly-pill-row">
-                <div class="readonly-pill"><span>현재 환율</span><strong id="calcExchange">-</strong></div>
-              </div>
-              <button id="calculateBtn" class="primary-action" disabled>계산 실행</button>
-            </article>
 
-            <!-- 4. 계산 결과 -->
-            <article class="panel analysis-step analysis-result">
-              <div class="step-head"><span class="step-num">4</span><h2>계산 결과</h2></div>
-              <div class="table-wrap">
-                <table class="result-table">
-                  <thead>
-                    <tr>
-                      <th>메탈</th>
-                      <th>함량%</th>
-                      <th>메탈(kg)</th>
-                      <th>시세($/kg)</th>
-                      <th>지불률</th>
-                      <th>금액($)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="resultRows"></tbody>
-                </table>
+              <!-- 탭 A -->
+              <div class="calc-tab-panel active" data-panel="A" role="tabpanel">
+                <div class="calc-table-wrap">
+                  <table class="calc-table" id="calcTableA">
+                    <thead>
+                      <tr><th class="row-label">BM</th><!-- 메탈 컬럼 동적 --></tr>
+                    </thead>
+                    <tbody>
+                      <tr class="row-input"><th>함량 (%)</th></tr>
+                      <tr class="row-input"><th>수분 (%)</th></tr>
+                      <tr class="row-calc"><th>메탈 (kg)</th></tr>
+                      <tr class="row-fetch"><th>시세 ($/kg)</th></tr>
+                      <tr class="row-input"><th>지불률 (%)</th></tr>
+                      <tr class="row-calc"><th>금액 ($)</th></tr>
+                    </tbody>
+                    <tfoot>
+                      <tr class="row-total"><th>총액 ($)</th><td class="cell-total" data-cell="total"></td></tr>
+                    </tfoot>
+                  </table>
+                </div>
+                <div class="calc-summary-grid">
+                  <div class="summary-cell summary-input">
+                    <span>총 수량 (kg)</span>
+                    <input type="number" step="0.1" min="0" value="1000" data-input="totalQty" />
+                  </div>
+                  <div class="summary-cell summary-calc">
+                    <span>단가 ($/kg)</span>
+                    <strong data-cell="usdPerKg">-</strong>
+                  </div>
+                  <div class="summary-cell summary-input">
+                    <span>환율</span>
+                    <strong data-cell="exchange">-</strong>
+                  </div>
+                  <div class="summary-cell summary-final">
+                    <span>단가 (₩/kg)</span>
+                    <strong data-cell="krwPerKg">-</strong>
+                  </div>
+                </div>
               </div>
-              <div class="result-summary-grid">
-                <div class="summary-card"><span>총액</span><strong id="resultTotal">-</strong></div>
-                <div class="summary-card"><span>단가 ($/kg)</span><strong id="resultUsdPerKg">-</strong></div>
-                <div class="summary-card accent"><span>단가 (₩/kg)</span><strong id="resultKrwPerKg">-</strong></div>
+
+              <!-- 탭 B -->
+              <div class="calc-tab-panel" data-panel="B" role="tabpanel" hidden>
+                <div class="calc-table-wrap">
+                  <table class="calc-table" id="calcTableB">
+                    <thead>
+                      <tr><th class="row-label">BM</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr class="row-input"><th>함량 (%)</th></tr>
+                      <tr class="row-input"><th>수분 (%)</th></tr>
+                      <tr class="row-calc"><th>메탈 (kg)</th></tr>
+                      <tr class="row-fetch"><th>시세 ($/kg)</th></tr>
+                      <tr class="row-input"><th>지불률 (%)</th></tr>
+                      <tr class="row-calc"><th>금액 ($)</th></tr>
+                    </tbody>
+                    <tfoot>
+                      <tr class="row-total"><th>총액 ($)</th><td class="cell-total" data-cell="total"></td></tr>
+                    </tfoot>
+                  </table>
+                </div>
+                <div class="calc-summary-grid">
+                  <div class="summary-cell summary-input">
+                    <span>총 수량 (kg)</span>
+                    <input type="number" step="0.1" min="0" value="1000" data-input="totalQty" />
+                  </div>
+                  <div class="summary-cell summary-calc">
+                    <span>단가 ($/kg)</span>
+                    <strong data-cell="usdPerKg">-</strong>
+                  </div>
+                  <div class="summary-cell summary-input">
+                    <span>환율</span>
+                    <strong data-cell="exchange">-</strong>
+                  </div>
+                  <div class="summary-cell summary-final">
+                    <span>단가 (₩/kg)</span>
+                    <strong data-cell="krwPerKg">-</strong>
+                  </div>
+                </div>
               </div>
             </article>
           </div>

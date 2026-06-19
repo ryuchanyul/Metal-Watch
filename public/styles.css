@@ -1381,3 +1381,267 @@ tbody tr:hover {
     font-size: 28px;
   }
 }
+
+/* ===== 분석표 — 탭 + 컬럼 형식 계산표 (2026-06-19) ===== */
+
+/* 탭 버튼 */
+.calc-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--line, #dbe3e8);
+  margin-bottom: 12px;
+}
+
+.calc-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted, #6d7b88);
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.calc-tab:hover {
+  color: var(--ink, #15202b);
+}
+
+.calc-tab.active {
+  color: var(--green, #157a5b);
+  border-bottom-color: var(--green, #157a5b);
+}
+
+.calc-tab-panel {
+  display: block;
+}
+
+.calc-tab-panel[hidden] {
+  display: none;
+}
+
+/* 계산표 (메탈을 컬럼으로) */
+.calc-table-wrap {
+  overflow-x: auto;
+}
+
+.calc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 0;
+}
+
+.calc-table th,
+.calc-table td {
+  padding: 8px 10px;
+  border: 1px solid var(--line, #dbe3e8);
+  text-align: center;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.calc-table thead th {
+  background: #f0f5f8;
+  color: var(--ink, #15202b);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.calc-table thead th.row-label {
+  background: #d8e0e6;
+  text-align: center;
+}
+
+.calc-table tbody th,
+.calc-table tfoot th {
+  background: #f0f5f8;
+  color: var(--ink, #15202b);
+  font-weight: 700;
+  text-align: center;
+  width: 110px;
+}
+
+/* 입력 가능 행 (함량, 수분, 지불률) — 노란 배경 강조 */
+.calc-table .row-input td {
+  background: #fff35a;
+  color: #15202b;
+  font-weight: 800;
+}
+
+.calc-table .row-input td input {
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 2px 4px;
+  font-size: 14px;
+  font-weight: 800;
+  text-align: center;
+  color: #15202b;
+}
+
+.calc-table .row-input td input:focus {
+  outline: none;
+  border-color: var(--green, #157a5b);
+  background: #fffabf;
+  box-shadow: 0 0 0 2px rgba(21, 122, 91, 0.2);
+}
+
+.calc-table .row-input td input::placeholder {
+  color: #8a8a4a;
+  font-weight: 600;
+}
+
+/* 자동 fetch 행 (시세) — 녹색 강조 */
+.calc-table .row-fetch td {
+  background: #c6f6c8;
+  color: #0e5a43;
+  font-weight: 800;
+}
+
+/* 자동 계산 행 (메탈kg, 금액) — 흰 배경 */
+.calc-table .row-calc td {
+  background: #fff;
+  color: var(--ink, #15202b);
+}
+
+/* 총액 행 — 짙은 강조 */
+.calc-table .row-total th,
+.calc-table .row-total td {
+  background: #2a3441;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+/* 빈 셀 표시 */
+.calc-table td:empty::before {
+  content: "-";
+  color: var(--muted, #6d7b88);
+}
+
+/* 메탈 헤더 (Ni, Ti, ...) */
+.calc-table thead th.metal-header {
+  background: #d8e0e6;
+  position: relative;
+}
+
+.calc-table thead th.metal-header .metal-delete {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: transparent;
+  border: 0;
+  color: #6d7b88;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.calc-table thead th.metal-header .metal-delete:hover {
+  color: #dc2626;
+}
+
+/* 메탈 추가 버튼 */
+.calc-add-metal-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.calc-add-metal {
+  background: none;
+  border: 1px dashed var(--line, #dbe3e8);
+  color: var(--green, #157a5b);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.calc-add-metal:hover {
+  background: #f0f9f5;
+}
+
+/* 계산 요약 (총수량/단가/환율/단가₩) */
+.calc-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.summary-cell {
+  padding: 12px 14px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--line, #dbe3e8);
+}
+
+.summary-cell > span {
+  font-size: 12px;
+  color: var(--muted, #6d7b88);
+  font-weight: 700;
+}
+
+.summary-cell > strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink, #15202b);
+}
+
+.summary-cell.summary-input {
+  background: #fff35a;
+}
+
+.summary-cell.summary-input > strong {
+  color: #15202b;
+}
+
+.summary-cell.summary-input > input {
+  border: 1px solid #d4c930;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 16px;
+  font-weight: 800;
+  text-align: right;
+  background: #fffeed;
+}
+
+.summary-cell.summary-input > input:focus {
+  outline: none;
+  border-color: var(--green, #157a5b);
+  box-shadow: 0 0 0 2px rgba(21, 122, 91, 0.2);
+}
+
+.summary-cell.summary-calc {
+  background: #fff;
+}
+
+.summary-cell.summary-final {
+  background: #2a3441;
+  color: #fff;
+  border-color: #2a3441;
+}
+
+.summary-cell.summary-final > span {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.summary-cell.summary-final > strong {
+  color: #fff;
+  font-size: 20px;
+}
+
+@media (max-width: 720px) {
+  .calc-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
