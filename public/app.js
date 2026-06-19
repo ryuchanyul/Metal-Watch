@@ -744,7 +744,7 @@ function closeOcrLoadingModal() {
 async function runOcr() {
   if (!analysisState.imageDataUrl) return;
   els.runOcrBtn.disabled = true;
-  setOcrStatus("Claude Vision 분석 중... (5~10초)", "info");
+  setOcrStatus("비전 분석 중... (5~10초)", "info");
   openOcrLoadingModal();
 
   try {
