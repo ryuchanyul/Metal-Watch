@@ -22,6 +22,7 @@ except ImportError:
     sys.exit(1)
 
 # symbol → factor (raw × factor = USD/kg)
+# au, ag: KOMIS MinorMetals에서 사라져 일시 중단. 기존 JSON/Supabase는 유지.
 SYMBOLS = {
     "li":    1.0,
     "co":    1.0,
@@ -35,8 +36,8 @@ SYMBOLS = {
     "mo":    0.001,   # USD/mt → USD/kg
     "w_wc":  1.0,
     "w_wo3": 1.0,
-    "au":    32.1507,   # USD/oz → USD/kg
-    "ag":    32.1507,
+    # "au":    32.1507,   # 일시 중단 — KOMIS 카테고리 이동 확인 필요
+    # "ag":    32.1507,
     "mg":    0.001,     # USD/T → USD/kg
     "ti":    1.0,       # USD/kg 그대로
     "in":    1.0,       # USD/kg 그대로
@@ -95,7 +96,8 @@ def main() -> int:
             failures.append(symbol)
 
     print(f"\n결과: {success}/{len(SYMBOLS)} 성공")
-    return 0 if not failures else 1
+    # 하나라도 성공하면 0 (다음 step 계속). 전부 실패만 exit 1.
+    return 0 if success > 0 else 1
 
 
 if __name__ == "__main__":
