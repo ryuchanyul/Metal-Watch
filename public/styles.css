@@ -384,6 +384,13 @@ tbody tr:hover {
   font-weight: 900;
 }
 
+.date-cell {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 /* 추정값 종목(자동 수집 불가, 수동 추정) — 시각 구분 */
 .estimate-row td {
   background: #fafafa;

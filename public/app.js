@@ -349,6 +349,16 @@ function renderPriceTable() {
   });
 
   const rowsHtml = filtered.map((item) => {
+    // 수집일자 셀: ISO collected_at → 'MM-DD'. 없으면 '-'
+    const dateCell = (() => {
+      if (!item.collected_at) return "-";
+      const d = new Date(item.collected_at);
+      if (!Number.isFinite(d.getTime())) return "-";
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      return `${mm}-${dd}`;
+    })();
+
     // 추정값 종목(예: Ba): "$25 ±$5" 형태로 표시, 변동률은 ±%
     if (item.isEstimate) {
       const range = item.usdRange || 0;
@@ -357,6 +367,7 @@ function renderPriceTable() {
       <tr class="clickable-row estimate-row" data-symbol="${item.symbol}">
         <td><strong>${item.name.replace("(", " (")}</strong><br><small>${item.spec}</small></td>
         <td>${formatter.usd(item.usd)} <span class="range">±${formatter.usd(range).replace("$","$")}</span></td>
+        <td class="date-cell">-</td>
         <td class="avg-cell">-</td>
         <td>${formatter.krw(krwPrice(item.usd))} <span class="range">±${formatter.krw(krwPrice(range))}</span></td>
         <td>-</td>
@@ -371,6 +382,7 @@ function renderPriceTable() {
       <tr class="clickable-row" data-symbol="${item.symbol}">
         <td><strong>${item.name.replace("(", " (")}</strong><br><small>${item.spec}</small></td>
         <td>${formatter.usd(item.usd)}</td>
+        <td class="date-cell">${dateCell}</td>
         <td class="avg-cell">${formatter.usd(item.monthlyAvg)}</td>
         <td>${formatter.krw(krwPrice(item.usd))}</td>
         <td>${formatter.krw(krwPrice(item.monthlyAvg))}</td>
@@ -700,6 +712,7 @@ async function loadLivePrices({ forceRefresh = false } = {}) {
           ...item,
           usd: live.usd,
           monthlyAvg: live.monthlyAvg ?? item.monthlyAvg,
+          collected_at: live.collected_at ?? null,
           source: live.source,
           isLive: true,
           manual: false
