@@ -1052,6 +1052,10 @@ tbody tr:hover {
   margin: 0 auto;
 }
 
+.preview-image[hidden] {
+  display: none;
+}
+
 .upload-actions {
   display: flex;
   gap: 8px;
