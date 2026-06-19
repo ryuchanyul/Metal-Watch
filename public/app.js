@@ -813,12 +813,15 @@ async function runOcr() {
     } else {
       setOcrStatus("추출 완료. (A)/(B) 표기 없어 양쪽 탭에 동일 적용", "success");
     }
+    closeOcrLoadingModal();
   } catch (e) {
     console.error("[OCR] 실패:", e);
     setOcrStatus(`OCR 실패: ${e.message}`, "error");
+    closeOcrLoadingModal();
+    // 사용자가 페이지 상단까지 스크롤 안 해도 보이도록 alert로 즉시 알림
+    alert(`OCR 분석 실패\n\n${e.message}\n\nVercel 환경변수 ANTHROPIC_API_KEY 등록 및 Redeploy 확인 필요.`);
   } finally {
     els.runOcrBtn.disabled = false;
-    closeOcrLoadingModal();
   }
 }
 
