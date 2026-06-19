@@ -19,12 +19,14 @@
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
   min-height: 100vh;
   background: var(--bg);
   color: var(--ink);
   font-family: "Segoe UI", "Noto Sans KR", Arial, sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 button,
@@ -1327,4 +1329,40 @@ tbody tr:hover {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ===== 모바일 가로 스크롤 방지 — 표 min-width 해제 (2026-06-19) ===== */
+@media (max-width: 620px) {
+  /* 시세표/모달 표는 .table-wrap이 가로 스크롤을 담당하므로 모바일에서 min-width 해제 */
+  table {
+    min-width: 0;
+  }
+
+  /* 모바일에서도 시세표는 어느 정도 가로 너비 유지해야 가독성 OK — 별도 처리 */
+  .table-wrap > table {
+    min-width: 560px;
+  }
+
+  /* 분석표의 작은 입력 표는 카드 폭 안에서 처리 */
+  .extract-table {
+    font-size: 12px;
+  }
+  .extract-table th,
+  .extract-table td {
+    padding: 4px 6px;
+  }
+  .extract-table input {
+    padding: 3px 4px;
+    font-size: 12px;
+  }
+
+  /* 분석표 카드의 패딩도 축소 */
+  .analysis-step {
+    padding: 14px;
+  }
+
+  /* 카드 안 input 텍스트가 너무 크면 viewport 넘침 방지 */
+  .field input {
+    max-width: 100%;
+  }
 }
