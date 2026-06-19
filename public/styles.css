@@ -1522,11 +1522,11 @@ tbody tr:hover {
   font-weight: 600;
 }
 
-/* 자동 fetch 행 (시세) — 녹색 강조 */
+/* 자동 fetch 행 (시세) — 일반 배경 (혼선 방지) */
 .calc-table .row-fetch td {
-  background: #c6f6c8;
-  color: #0e5a43;
-  font-weight: 800;
+  background: #fff;
+  color: var(--ink, #15202b);
+  font-weight: 700;
 }
 
 /* 자동 계산 행 (메탈kg, 금액) — 흰 배경 */
