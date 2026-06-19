@@ -15,12 +15,10 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   process.exit(1);
 }
 
-// 키 형식 진단 (보안: 첫 12자만 노출)
-console.log("[DEBUG] SUPABASE_SERVICE_KEY prefix:", SUPABASE_SERVICE_KEY.substring(0, 12) + "...");
-console.log("[DEBUG] SUPABASE_SERVICE_KEY length:", SUPABASE_SERVICE_KEY.length);
-console.log("[DEBUG] runner UTC time:", new Date().toISOString());
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function insertRows(table, rows) {
+// JWT issued at future 같은 일시적 시간 sync 이슈 대비 — 최대 3회 retry (2초 간격)
+async function insertRowsWithRetry(table, rows, attempt = 1) {
   if (!rows.length) {
     console.log(`[${table}] 적재할 행 없음`);
     return;
@@ -37,13 +35,24 @@ async function insertRows(table, rows) {
     body: JSON.stringify(rows)
   });
 
-  if (!res.ok) {
-    const detail = await res.text();
-    throw new Error(`Supabase insert ${table} 실패: ${res.status} ${detail}`);
+  if (res.ok) {
+    console.log(`[${table}] ${rows.length}행 적재 완료${attempt > 1 ? ` (재시도 ${attempt - 1}회)` : ""}`);
+    return;
   }
 
-  console.log(`[${table}] ${rows.length}행 적재 완료`);
+  const detail = await res.text();
+  const isJwtTimeIssue = res.status === 401 && detail.includes("JWT issued at future");
+
+  if (isJwtTimeIssue && attempt < 3) {
+    console.log(`[${table}] JWT 시간 sync 이슈 — 2초 대기 후 재시도 (${attempt}/3)`);
+    await sleep(2000);
+    return insertRowsWithRetry(table, rows, attempt + 1);
+  }
+
+  throw new Error(`Supabase insert ${table} 실패: ${res.status} ${detail}`);
 }
+
+const insertRows = (table, rows) => insertRowsWithRetry(table, rows);
 
 async function main() {
   const startedAt = new Date().toISOString();
