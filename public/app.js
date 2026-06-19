@@ -765,8 +765,12 @@ async function runOcr() {
     if (!res.ok) {
       throw new Error(data.message || data.error || `HTTP ${res.status}`);
     }
-    applyExtractedData(data);
-    setOcrStatus("추출 완료. 결과를 확인하고 필요시 수정해주세요.", "success");
+    const { targetTab } = applyExtractedData(data);
+    if (targetTab) {
+      setOcrStatus(`시료명에 "(${targetTab})" 감지 → 습식 ${targetTab} 탭에만 적용됨`, "success");
+    } else {
+      setOcrStatus("추출 완료. (A)/(B) 표기 없어 양쪽 탭에 동일 적용", "success");
+    }
   } catch (e) {
     console.error("[OCR] 실패:", e);
     setOcrStatus(`OCR 실패: ${e.message}`, "error");
@@ -774,6 +778,17 @@ async function runOcr() {
     els.runOcrBtn.disabled = false;
     closeOcrLoadingModal();
   }
+}
+
+// 시료명에서 (A) / (B) 패턴 감지 — 대소문자 무관
+function detectSampleTab(sampleName) {
+  if (!sampleName) return null;
+  const s = sampleName.toUpperCase();
+  const hasA = /\(\s*A\s*\)/.test(s);
+  const hasB = /\(\s*B\s*\)/.test(s);
+  if (hasA && !hasB) return "A";
+  if (hasB && !hasA) return "B";
+  return null;
 }
 
 function applyExtractedData(data) {
@@ -791,7 +806,7 @@ function applyExtractedData(data) {
   els.exIssuer.value = analysisState.meta.issuer;
   renderConfidence(analysisState.meta.confidence);
 
-  // 2. 메탈 함량/수분 → 양쪽 탭 동일하게 초기화 (지불률 100% 기본)
+  // 2. 메탈 함량/수분 추출
   const metals = (data.metals || []).map((m) => ({
     name: m.name || "",
     symbol: m.symbol || "",
@@ -799,7 +814,10 @@ function applyExtractedData(data) {
   }));
   const moisture = data.moisture_percent ?? null;
 
-  ["A", "B"].forEach((tabId) => {
+  // 3. 시료명에 (A)/(B) 표기 있으면 해당 탭만, 없으면 양쪽 탭에 동일 적용
+  const targetTab = detectSampleTab(data.sample_name);
+
+  const applyToTab = (tabId) => {
     const tab = analysisState.tabs[tabId];
     tab.metals = metals.map((m) => ({ ...m }));
     tab.moisture = moisture;
@@ -807,10 +825,20 @@ function applyExtractedData(data) {
     metals.forEach((m) => {
       if (m.symbol) tab.payRates[m.symbol] = 100;
     });
-  });
+  };
 
-  renderCalcTable("A");
-  renderCalcTable("B");
+  if (targetTab) {
+    applyToTab(targetTab);
+    renderCalcTable(targetTab);
+    switchTab(targetTab);
+  } else {
+    applyToTab("A");
+    applyToTab("B");
+    renderCalcTable("A");
+    renderCalcTable("B");
+  }
+
+  return { targetTab };
 }
 
 function renderConfidence(c) {
