@@ -1,9 +1,9 @@
 name: Daily KOMIS auto-download
 
-# 매일 KST 09:00 (00:00 UTC) — KOMIS가 전일 가격을 발표한 직후
+# 매일 KST 10:00 (01:00 UTC) — KOMIS 발표 시점 여유 확보
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 1 * * *"
   workflow_dispatch:
 
 jobs:
