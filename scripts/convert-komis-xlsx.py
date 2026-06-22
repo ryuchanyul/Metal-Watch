@@ -52,6 +52,12 @@ def convert_one(xlsx_path: Path, symbol: str, factor: float) -> int:
     wb = openpyxl.load_workbook(xlsx_path, data_only=True)
     ws = wb["RsrcPrice"]
 
+    # DEBUG: 원본 xlsx의 마지막 5행 (data_only) 출력 — KOMIS 발표 상태 진단
+    all_rows = list(ws.iter_rows(min_row=4, values_only=True))
+    print(f"  [debug {symbol}] xlsx 마지막 5행 (raw):")
+    for r in all_rows[-5:]:
+        print(f"    {r[:3]}")
+
     rows = []
     for row in ws.iter_rows(min_row=4, values_only=True):
         if not row[0] or row[1] is None:
