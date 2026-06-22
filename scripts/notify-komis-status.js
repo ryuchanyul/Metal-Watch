@@ -1,0 +1,117 @@
+// KOMIS daily cron 성공 후 종목별 최신 데이터 날짜를 텔레그램에 보낸다.
+
+const {
+  SUPABASE_URL,
+  SUPABASE_SERVICE_KEY,
+  TELEGRAM_BOT_TOKEN,
+  TELEGRAM_CHAT_ID,
+  GITHUB_RUN_ID,
+  GITHUB_REPOSITORY
+} = process.env;
+
+if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+  console.log("[skip] TELEGRAM_BOT_TOKEN/CHAT_ID 미설정");
+  process.exit(0);
+}
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  console.log("[skip] SUPABASE_URL/SERVICE_KEY 미설정");
+  process.exit(0);
+}
+
+const KOMIS_SOURCE = "KOMIS (광해광업공단)";
+const SYMBOLS = [
+  "Cu", "Al", "Ni", "Pb", "Zn", "Sn",
+  "Au", "Ag",
+  "Co", "Li", "Mn", "Mo", "W_WC", "W_WO3", "Mg", "Ti", "In"
+];
+
+async function getLatestDate(symbol) {
+  const url =
+    `${SUPABASE_URL}/rest/v1/price_snapshots` +
+    `?symbol=eq.${symbol}` +
+    `&source=eq.${encodeURIComponent(KOMIS_SOURCE)}` +
+    `&order=collected_at.desc&limit=1&select=collected_at`;
+  const res = await fetch(url, {
+    headers: {
+      apikey: SUPABASE_SERVICE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`
+    }
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data[0]?.collected_at?.slice(0, 10) || null;
+}
+
+async function main() {
+  // 종목별 최신 날짜 수집 (병렬)
+  const entries = await Promise.all(
+    SYMBOLS.map(async (sym) => [sym, await getLatestDate(sym)])
+  );
+
+  // 날짜별 종목 그룹화 (최신 날짜부터)
+  const byDate = {};
+  let missing = [];
+  for (const [sym, date] of entries) {
+    if (!date) {
+      missing.push(sym);
+      continue;
+    }
+    if (!byDate[date]) byDate[date] = [];
+    byDate[date].push(sym);
+  }
+
+  const sortedDates = Object.keys(byDate).sort().reverse();
+
+  // KST 시간 표시
+  const kstNow = new Date(Date.now() + 9 * 3600 * 1000)
+    .toISOString().slice(0, 16).replace("T", " ");
+
+  let summary = "";
+  for (const date of sortedDates) {
+    summary += `📅 ${date} : ${byDate[date].join(", ")}\n`;
+  }
+  if (missing.length) {
+    summary += `\n⚠️ 데이터 없음 : ${missing.join(", ")}\n`;
+  }
+
+  const runUrl = GITHUB_RUN_ID
+    ? `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`
+    : "";
+
+  const text = `✅ [Metal Watch] KOMIS 일일 수집 완료
+
+실행 시각: ${kstNow} KST
+실행 ID: #${GITHUB_RUN_ID || "-"}
+
+종목별 최신 데이터:
+${summary}
+${runUrl ? `로그: ${runUrl}` : ""}`;
+
+  const params = new URLSearchParams();
+  params.set("chat_id", TELEGRAM_CHAT_ID);
+  params.set("text", text);
+  params.set("disable_web_page_preview", "true");
+
+  const tgRes = await fetch(
+    `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString()
+    }
+  );
+
+  if (!tgRes.ok) {
+    const detail = await tgRes.text();
+    console.error("텔레그램 전송 실패:", tgRes.status, detail);
+    process.exit(1);
+  }
+  console.log("텔레그램 성공 알림 전송 완료");
+  console.log("---");
+  console.log(text);
+}
+
+main().catch((e) => {
+  console.error("[notify-komis-status] 실패:", e);
+  process.exit(1);
+});
