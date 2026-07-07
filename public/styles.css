@@ -2507,3 +2507,8 @@ body.focus-mode #prices .section-heading {
     min-height: 48px;
   }
 }
+
+/* topbar의 초기화면 버튼 감춤 (사이드바 초기화면과 중복) */
+.focus-enter-btn {
+  display: none !important;
+}
