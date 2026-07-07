@@ -2330,3 +2330,17 @@ body.focus-mode[data-focus-tab="analysis"] #analysis.active {
     gap: 10px;
   }
 }
+
+/* focus 모드에서 원자재 시세표 헤더 단순화 — 시세 갱신 버튼만 노출 */
+body.focus-mode #prices .section-heading h2 {
+  display: none;
+}
+
+body.focus-mode #prices #priceSearch {
+  display: none;
+}
+
+/* 검색 input이 사라지면 table-tools가 갱신 버튼 하나만 남으니 우측 정렬 자연스러움 */
+body.focus-mode #prices .section-heading {
+  justify-content: flex-end;
+}
