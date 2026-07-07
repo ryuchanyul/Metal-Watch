@@ -2602,3 +2602,38 @@ body.focus-mode #prices .section-heading {
     margin-bottom: 12px;
   }
 }
+
+/* 모바일 사이드바 여백 추가 축소 */
+@media (max-width: 920px) {
+  .sidebar {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  .brand {
+    margin-bottom: 6px !important;
+  }
+  .side-nav {
+    gap: 4px !important;
+  }
+  .side-nav button:not(.side-focus-enter) {
+    padding: 6px 4px !important;
+    min-height: 32px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  .brand {
+    margin-bottom: 4px !important;
+  }
+  .side-nav {
+    gap: 4px !important;
+  }
+  .side-nav button:not(.side-focus-enter) {
+    padding: 5px 3px !important;
+    min-height: 28px !important;
+  }
+}
