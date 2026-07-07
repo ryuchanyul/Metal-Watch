@@ -2591,3 +2591,14 @@ body.focus-mode #prices .section-heading {
     font-size: 14px !important;
   }
 }
+
+/* 모바일 사이드바 상하 여백 절반 축소 */
+@media (max-width: 920px) {
+  .sidebar {
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+  .brand {
+    margin-bottom: 12px;
+  }
+}
