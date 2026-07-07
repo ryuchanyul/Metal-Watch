@@ -2402,3 +2402,26 @@ body.focus-mode #prices .section-heading {
     margin-bottom: -20%; /* 축소로 생긴 하단 여백 회수 */
   }
 }
+
+/* ===== Focus 모드 시세표 — 원자재명(진하게) vs 스펙(가늘고 작게) 대비 ===== */
+@media (max-width: 480px) {
+  /* 원자재명 - 진하게 크게 */
+  body.focus-mode #prices tbody td:first-child strong {
+    font-size: 13px;
+    font-weight: 900;
+    color: #15202b;
+    line-height: 1.2;
+    display: inline-block;
+  }
+
+  /* 스펙(99.8%min...) - 얇고 작게 회색 */
+  body.focus-mode #prices tbody td:first-child small {
+    font-size: 9px;
+    font-weight: 400;
+    color: #8a95a0;
+    display: inline-block;
+    margin-top: 3px;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+  }
+}
