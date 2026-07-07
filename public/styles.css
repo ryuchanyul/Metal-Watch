@@ -1993,3 +1993,647 @@ tbody tr:hover {
   border-radius: 4px;
   font-size: 13px;
 }
+
+/* ===== Focus 모드 — 단가/분석 원터치 UX ===== */
+
+/* focus-bar (모드 진입 시 상단 고정) */
+.focus-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--line, #dbe3e8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+body.focus-mode .focus-bar {
+  display: flex;
+}
+
+/* focus 모드에서 사이드바 + topbar 숨김 */
+body.focus-mode .sidebar {
+  display: none;
+}
+
+body.focus-mode .topbar {
+  display: none;
+}
+
+/* focus 모드일 때 app-shell 그리드 1열 (사이드바 사라지므로) */
+body.focus-mode .app-shell {
+  grid-template-columns: 1fr;
+}
+
+body.focus-mode .content {
+  padding: 20px;
+}
+
+/* focus 탭 (좌측) */
+.focus-tabs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.focus-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 12px 20px;
+  color: var(--muted, #6d7b88);
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s, color 0.15s;
+  min-height: 48px;
+}
+
+.focus-tab:hover {
+  background: #f0f5f8;
+  color: var(--ink, #15202b);
+}
+
+.focus-tab.active {
+  background: var(--green, #157a5b);
+  color: #fff;
+}
+
+.focus-tab-icon {
+  font-size: 20px;
+}
+
+/* focus X 닫기 (우측 상단, 크게) */
+.focus-close {
+  appearance: none;
+  border: 0;
+  background: #f0f5f8;
+  color: var(--ink, #15202b);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.focus-close:hover {
+  background: #e5ebef;
+}
+
+/* 일반 모드에서 topbar의 focus 진입 버튼 (큰 녹색) */
+.focus-enter-btn {
+  appearance: none;
+  border: 0;
+  background: var(--green, #157a5b);
+  color: #fff;
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(21, 122, 91, 0.25);
+  transition: background 0.15s, transform 0.1s;
+  min-height: 48px;
+}
+
+.focus-enter-btn:hover {
+  background: #0e5a43;
+}
+
+.focus-enter-btn:active {
+  transform: scale(0.98);
+}
+
+.focus-enter-icon {
+  font-size: 22px;
+}
+
+/* focus 모드에서는 이 버튼 자체가 topbar에 있으므로 숨김 */
+body.focus-mode .focus-enter-btn {
+  display: none;
+}
+
+/* 사이드바 상단 focus 진입 큰 버튼 */
+.side-focus-enter {
+  appearance: none;
+  border: 0;
+  background: var(--green, #157a5b);
+  color: #fff;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.side-focus-enter:hover {
+  background: #0e5a43;
+}
+
+.side-focus-enter span[aria-hidden] {
+  font-size: 18px;
+}
+
+.side-nav-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 0 12px;
+}
+
+/* focus 모드에서 view 표시 관리 — data-focus-tab에 따라 */
+body.focus-mode .view {
+  display: none;
+}
+
+body.focus-mode[data-focus-tab="prices"] #prices,
+body.focus-mode[data-focus-tab="analysis"] #analysis {
+  display: grid;
+  gap: 18px;
+}
+
+/* focus 모드에서 view의 section-heading 표시 */
+body.focus-mode .view.active {
+  /* 기존 .view.active 규칙 재정의 필요 — display:grid + gap 유지 */
+  display: none;
+}
+
+body.focus-mode[data-focus-tab="prices"] #prices.active,
+body.focus-mode[data-focus-tab="analysis"] #analysis.active {
+  display: grid;
+}
+
+/* 모바일: focus-bar 축소 + 탭 아이콘만 */
+@media (max-width: 480px) {
+  .focus-bar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .focus-tab {
+    padding: 10px 14px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .focus-close {
+    width: 44px;
+    height: 44px;
+    font-size: 26px;
+  }
+  .focus-enter-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  body.focus-mode .content {
+    padding: 12px;
+  }
+}
+
+/* ===== 모바일 분석표 컴팩트 (focus-mode 프리뷰) ===== */
+@media (max-width: 480px) {
+  /* 분석표 카드 패딩 축소 */
+  .analysis-step {
+    padding: 12px;
+    gap: 10px;
+  }
+  .step-head {
+    padding-bottom: 8px;
+    margin-bottom: 2px;
+    gap: 8px;
+  }
+  .step-head h2 {
+    font-size: 15px;
+  }
+  .step-num {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  /* 업로드 zone 축소 */
+  .upload-zone {
+    min-height: 110px;
+  }
+  .upload-hint {
+    font-size: 12px;
+  }
+  .preview-image {
+    max-height: 200px;
+  }
+  .camera-btn {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  /* 시료 메타 폼 축소 */
+  .extract-meta {
+    gap: 8px;
+  }
+  .field > span {
+    font-size: 11px;
+  }
+  .field input {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  /* 계산 탭 축소 */
+  .calc-tabs {
+    margin-bottom: 8px;
+  }
+  .calc-tab {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  /* 계산 표 축소 */
+  .calc-table th,
+  .calc-table td {
+    padding: 8px 6px;
+    font-size: 13px;
+  }
+  .calc-table tbody th,
+  .calc-table tfoot th {
+    width: 82px;
+    font-size: 12px;
+  }
+  .calc-table .row-input td input {
+    padding: 6px 6px;
+    font-size: 13px;
+    min-height: 32px;
+    border-width: 1.5px;
+  }
+
+  /* 요약 카드 4개 (총수량/단가/환율/₩단가) 축소 */
+  .calc-summary-grid {
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .summary-cell {
+    padding: 8px 10px;
+    gap: 2px;
+  }
+  .summary-cell > span {
+    font-size: 10px;
+  }
+  .summary-cell > strong {
+    font-size: 14px;
+  }
+  .summary-cell.summary-input > input {
+    padding: 8px 10px;
+    font-size: 14px;
+    min-height: 36px;
+    border-width: 1.5px;
+  }
+  .summary-cell.summary-final > strong {
+    font-size: 16px;
+  }
+
+  /* 저장 영역 */
+  .analysis-save-panel textarea {
+    padding: 8px 10px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+  .save-actions .primary-action {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  .save-hint {
+    font-size: 11px;
+  }
+
+  /* focus 모드에서 상단 여백 절약 */
+  body.focus-mode .content {
+    padding: 8px;
+    gap: 10px;
+  }
+}
+
+/* focus 모드에서 원자재 시세표 헤더 단순화 — 시세 갱신 버튼만 노출 */
+body.focus-mode #prices .section-heading h2 {
+  display: none;
+}
+
+body.focus-mode #prices #priceSearch {
+  display: none;
+}
+
+/* 검색 input이 사라지면 table-tools가 갱신 버튼 하나만 남으니 우측 정렬 자연스러움 */
+body.focus-mode #prices .section-heading {
+  justify-content: flex-end;
+}
+
+/* ===== Focus 모드 시세표 — 모바일에서 한 화면에 fit ===== */
+@media (max-width: 480px) {
+  /* 표의 강제 min-width 해제 */
+  body.focus-mode #prices table {
+    min-width: 0;
+    font-size: 11px;
+    table-layout: auto;
+  }
+
+  /* 헤더 축소 */
+  body.focus-mode #prices thead th {
+    padding: 5px 3px;
+    font-size: 10px;
+    line-height: 1.15;
+  }
+
+  /* 셀 컴팩트 */
+  body.focus-mode #prices tbody td {
+    padding: 6px 3px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  body.focus-mode #prices tbody td:first-child {
+    padding-left: 5px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  /* 강조 셀들 (월평균/변화율/수집일자) 축소 */
+  body.focus-mode #prices .avg-cell {
+    font-size: 10px;
+    padding: 5px 3px;
+  }
+  body.focus-mode #prices .date-cell {
+    font-size: 9px;
+  }
+  body.focus-mode #prices .change {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+
+  /* table-wrap 자체 overflow는 유지 (표가 그래도 넘칠 경우 대비) */
+  body.focus-mode #prices .table-wrap {
+    padding: 0;
+  }
+}
+
+/* ===== Focus 모드 시세표 — 표 자체를 CSS scale로 축소 렌더링 ===== */
+@media (max-width: 480px) {
+  body.focus-mode #prices .table-wrap {
+    transform: scale(0.82);
+    transform-origin: top left;
+    width: 122%; /* 1 / 0.82 ≈ 122% — 축소만큼 폭 확대해서 화면 채움 */
+    margin-bottom: -20%; /* 축소로 생긴 하단 여백 회수 */
+  }
+}
+
+/* ===== Focus 모드 시세표 — 원자재명(진하게) vs 스펙(가늘고 작게) 대비 ===== */
+@media (max-width: 480px) {
+  /* 원자재명 - 진하게 크게 */
+  body.focus-mode #prices tbody td:first-child strong {
+    font-size: 13px;
+    font-weight: 900;
+    color: #15202b;
+    line-height: 1.2;
+    display: inline-block;
+  }
+
+  /* 스펙(99.8%min...) - 얇고 작게 회색 */
+  body.focus-mode #prices tbody td:first-child small {
+    font-size: 9px;
+    font-weight: 400;
+    color: #8a95a0;
+    display: inline-block;
+    margin-top: 3px;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+  }
+}
+
+/* ===== 모바일 사이드바 정리 — 초기화면 버튼 풀폭 + nav 6개 배치 ===== */
+@media (max-width: 920px) {
+  /* 초기화면 버튼은 항상 한 줄 전체 차지 (grid 자식이지만 span 처리) */
+  .side-focus-enter {
+    grid-column: 1 / -1;
+    justify-content: center;
+    padding: 14px 16px;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  /* 구분선도 풀폭 */
+  .side-nav-divider {
+    grid-column: 1 / -1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 4px 0 8px;
+  }
+
+  /* nav 항목 6개를 3열 x 2행으로 정리 (5열 대신) */
+  .side-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  /* nav 버튼 컴팩트 */
+  .side-nav button:not(.side-focus-enter) {
+    text-align: center;
+    padding: 10px 6px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .side-focus-enter {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  .side-nav button:not(.side-focus-enter) {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+}
+
+/* ===== 모바일 사이드바 — 초기화면 포함 4개를 한 줄로 ===== */
+@media (max-width: 920px) {
+  .side-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  /* 초기화면 버튼도 한 칸만 차지 (풀폭 취소) */
+  .side-focus-enter {
+    grid-column: auto;
+    padding: 10px 6px;
+    font-size: 12px;
+    margin-bottom: 0;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+    line-height: 1.15;
+  }
+
+  .side-focus-enter span[aria-hidden] {
+    font-size: 18px;
+  }
+
+  /* 구분선 숨김 */
+  .side-nav-divider {
+    display: none;
+  }
+
+  /* 나머지 nav 버튼도 동일 크기 정렬 */
+  .side-nav button:not(.side-focus-enter) {
+    padding: 10px 6px;
+    font-size: 12px;
+    min-height: 48px;
+  }
+}
+
+/* topbar의 초기화면 버튼 감춤 (사이드바 초기화면과 중복) */
+.focus-enter-btn {
+  display: none !important;
+}
+
+/* 초기화면 버튼 — 노랑색 강조 (아이콘 없음) */
+.side-focus-enter {
+  background: var(--yellow, #fff35a) !important;
+  color: #15202b !important;
+}
+
+.side-focus-enter:hover {
+  background: #f5d900 !important;
+}
+
+/* 시세표/분석표 버튼 — 배경 없이 노랑 글자만 */
+.side-focus-enter {
+  background: transparent !important;
+  color: var(--yellow, #fff35a) !important;
+}
+
+.side-focus-enter:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff35a !important;
+}
+
+/* ===== brand 영역에 시세표/분석표 버튼 우측 배치 ===== */
+.brand {
+  flex-wrap: wrap;
+}
+
+.brand-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 브랜드 안의 시세표/분석표 버튼 — 우측으로 밀기 */
+.brand .side-focus-enter {
+  margin-left: auto;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 243, 90, 0.4);
+  white-space: nowrap;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* 모바일 — nav 3열 (상세 차트/재고/설정) */
+@media (max-width: 920px) {
+  .side-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .brand .side-focus-enter {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand .side-focus-enter {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}
+
+/* 시세표보기 글자만 크게 (버튼 크기는 padding 그대로 유지) */
+.brand .side-focus-enter {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+}
+
+@media (max-width: 920px) {
+  .brand .side-focus-enter {
+    font-size: 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand .side-focus-enter {
+    font-size: 14px !important;
+  }
+}
+
+/* 모바일 사이드바 상하 여백 절반 축소 */
+@media (max-width: 920px) {
+  .sidebar {
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+  .brand {
+    margin-bottom: 12px;
+  }
+}
+
+/* 모바일 사이드바 여백 추가 축소 */
+@media (max-width: 920px) {
+  .sidebar {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  .brand {
+    margin-bottom: 6px !important;
+  }
+  .side-nav {
+    gap: 4px !important;
+  }
+  .side-nav button:not(.side-focus-enter) {
+    padding: 6px 4px !important;
+    min-height: 32px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+  }
+  .brand {
+    margin-bottom: 4px !important;
+  }
+  .side-nav {
+    gap: 4px !important;
+  }
+  .side-nav button:not(.side-focus-enter) {
+    padding: 5px 3px !important;
+    min-height: 28px !important;
+  }
+}
