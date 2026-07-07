@@ -2522,3 +2522,14 @@ body.focus-mode #prices .section-heading {
 .side-focus-enter:hover {
   background: #f5d900 !important;
 }
+
+/* 시세표/분석표 버튼 — 배경 없이 노랑 글자만 */
+.side-focus-enter {
+  background: transparent !important;
+  color: var(--yellow, #fff35a) !important;
+}
+
+.side-focus-enter:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff35a !important;
+}
