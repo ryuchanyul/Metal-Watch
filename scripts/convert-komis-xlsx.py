@@ -48,15 +48,40 @@ DATA_DIR = here / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
 
+# 전일 대비 급변 시 이상값으로 판단할 임계값 (30% 이상 하락/상승)
+OUTLIER_THRESHOLD = 0.30
+
+
+def clean_outliers(rows, symbol):
+    """전일 대비 ±30% 이상 급변한 값을 전일 값으로 대체.
+
+    rows: [[iso, usd_per_kg, raw_value], ...] 날짜 오름차순.
+    """
+    if len(rows) <= 1:
+        return rows
+    cleaned = [rows[0]]
+    replaced = 0
+    for i in range(1, len(rows)):
+        cur = rows[i]
+        prev = cleaned[-1]
+        prev_val = prev[1]
+        cur_val = cur[1]
+        if prev_val > 0:
+            change_ratio = abs(cur_val - prev_val) / prev_val
+            if change_ratio > OUTLIER_THRESHOLD:
+                # 이상값 → 전일 값으로 대체 (raw_value도 함께)
+                cleaned.append([cur[0], prev[1], prev[2]])
+                replaced += 1
+                continue
+        cleaned.append(cur)
+    if replaced > 0:
+        print(f"  [outlier {symbol}] {replaced}건 전일값으로 대체 (임계값 ±{OUTLIER_THRESHOLD*100:.0f}%)")
+    return cleaned
+
+
 def convert_one(xlsx_path: Path, symbol: str, factor: float) -> int:
     wb = openpyxl.load_workbook(xlsx_path, data_only=True)
     ws = wb["RsrcPrice"]
-
-    # DEBUG: 원본 xlsx의 처음 5행 (최신순) — KOMIS 발표 상태 진단
-    all_rows = list(ws.iter_rows(min_row=4, values_only=True))
-    print(f"  [debug {symbol}] xlsx 처음 5행 (최신 순):")
-    for r in all_rows[:5]:
-        print(f"    {r[:3]}")
 
     rows = []
     for row in ws.iter_rows(min_row=4, values_only=True):
@@ -69,6 +94,9 @@ def convert_one(xlsx_path: Path, symbol: str, factor: float) -> int:
         rows.append([iso, usd_per_kg, raw])
 
     rows.sort(key=lambda r: r[0])
+
+    # 이상값 필터: 전일 대비 ±30% 이상 급변 → 전일 값으로 대체
+    rows = clean_outliers(rows, symbol)
 
     out_path = DATA_DIR / f"{symbol}-komis.json"
     with open(out_path, "w", encoding="utf-8") as f:
