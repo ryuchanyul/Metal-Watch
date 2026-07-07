@@ -2344,3 +2344,51 @@ body.focus-mode #prices #priceSearch {
 body.focus-mode #prices .section-heading {
   justify-content: flex-end;
 }
+
+/* ===== Focus 모드 시세표 — 모바일에서 한 화면에 fit ===== */
+@media (max-width: 480px) {
+  /* 표의 강제 min-width 해제 */
+  body.focus-mode #prices table {
+    min-width: 0;
+    font-size: 11px;
+    table-layout: auto;
+  }
+
+  /* 헤더 축소 */
+  body.focus-mode #prices thead th {
+    padding: 5px 3px;
+    font-size: 10px;
+    line-height: 1.15;
+  }
+
+  /* 셀 컴팩트 */
+  body.focus-mode #prices tbody td {
+    padding: 6px 3px;
+    font-size: 11px;
+    line-height: 1.2;
+  }
+
+  body.focus-mode #prices tbody td:first-child {
+    padding-left: 5px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  /* 강조 셀들 (월평균/변화율/수집일자) 축소 */
+  body.focus-mode #prices .avg-cell {
+    font-size: 10px;
+    padding: 5px 3px;
+  }
+  body.focus-mode #prices .date-cell {
+    font-size: 9px;
+  }
+  body.focus-mode #prices .change {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+
+  /* table-wrap 자체 overflow는 유지 (표가 그래도 넘칠 경우 대비) */
+  body.focus-mode #prices .table-wrap {
+    padding: 0;
+  }
+}
