@@ -2209,3 +2209,124 @@ body.focus-mode[data-focus-tab="analysis"] #analysis.active {
     padding: 12px;
   }
 }
+
+/* ===== 모바일 분석표 컴팩트 (focus-mode 프리뷰) ===== */
+@media (max-width: 480px) {
+  /* 분석표 카드 패딩 축소 */
+  .analysis-step {
+    padding: 12px;
+    gap: 10px;
+  }
+  .step-head {
+    padding-bottom: 8px;
+    margin-bottom: 2px;
+    gap: 8px;
+  }
+  .step-head h2 {
+    font-size: 15px;
+  }
+  .step-num {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  /* 업로드 zone 축소 */
+  .upload-zone {
+    min-height: 110px;
+  }
+  .upload-hint {
+    font-size: 12px;
+  }
+  .preview-image {
+    max-height: 200px;
+  }
+  .camera-btn {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+
+  /* 시료 메타 폼 축소 */
+  .extract-meta {
+    gap: 8px;
+  }
+  .field > span {
+    font-size: 11px;
+  }
+  .field input {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  /* 계산 탭 축소 */
+  .calc-tabs {
+    margin-bottom: 8px;
+  }
+  .calc-tab {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  /* 계산 표 축소 */
+  .calc-table th,
+  .calc-table td {
+    padding: 8px 6px;
+    font-size: 13px;
+  }
+  .calc-table tbody th,
+  .calc-table tfoot th {
+    width: 82px;
+    font-size: 12px;
+  }
+  .calc-table .row-input td input {
+    padding: 6px 6px;
+    font-size: 13px;
+    min-height: 32px;
+    border-width: 1.5px;
+  }
+
+  /* 요약 카드 4개 (총수량/단가/환율/₩단가) 축소 */
+  .calc-summary-grid {
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .summary-cell {
+    padding: 8px 10px;
+    gap: 2px;
+  }
+  .summary-cell > span {
+    font-size: 10px;
+  }
+  .summary-cell > strong {
+    font-size: 14px;
+  }
+  .summary-cell.summary-input > input {
+    padding: 8px 10px;
+    font-size: 14px;
+    min-height: 36px;
+    border-width: 1.5px;
+  }
+  .summary-cell.summary-final > strong {
+    font-size: 16px;
+  }
+
+  /* 저장 영역 */
+  .analysis-save-panel textarea {
+    padding: 8px 10px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+  .save-actions .primary-action {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  .save-hint {
+    font-size: 11px;
+  }
+
+  /* focus 모드에서 상단 여백 절약 */
+  body.focus-mode .content {
+    padding: 8px;
+    gap: 10px;
+  }
+}
