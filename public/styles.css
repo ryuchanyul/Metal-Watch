@@ -2512,3 +2512,13 @@ body.focus-mode #prices .section-heading {
 .focus-enter-btn {
   display: none !important;
 }
+
+/* 초기화면 버튼 — 노랑색 강조 (아이콘 없음) */
+.side-focus-enter {
+  background: var(--yellow, #fff35a) !important;
+  color: #15202b !important;
+}
+
+.side-focus-enter:hover {
+  background: #f5d900 !important;
+}
