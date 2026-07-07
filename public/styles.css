@@ -2392,3 +2392,13 @@ body.focus-mode #prices .section-heading {
     padding: 0;
   }
 }
+
+/* ===== Focus 모드 시세표 — 표 자체를 CSS scale로 축소 렌더링 ===== */
+@media (max-width: 480px) {
+  body.focus-mode #prices .table-wrap {
+    transform: scale(0.82);
+    transform-origin: top left;
+    width: 122%; /* 1 / 0.82 ≈ 122% — 축소만큼 폭 확대해서 화면 채움 */
+    margin-bottom: -20%; /* 축소로 생긴 하단 여백 회수 */
+  }
+}
