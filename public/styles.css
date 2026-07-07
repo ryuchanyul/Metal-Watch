@@ -2533,3 +2533,43 @@ body.focus-mode #prices .section-heading {
   background: rgba(255, 255, 255, 0.08) !important;
   color: #fff35a !important;
 }
+
+/* ===== brand 영역에 시세표/분석표 버튼 우측 배치 ===== */
+.brand {
+  flex-wrap: wrap;
+}
+
+.brand-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 브랜드 안의 시세표/분석표 버튼 — 우측으로 밀기 */
+.brand .side-focus-enter {
+  margin-left: auto;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 243, 90, 0.4);
+  white-space: nowrap;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* 모바일 — nav 3열 (상세 차트/재고/설정) */
+@media (max-width: 920px) {
+  .side-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .brand .side-focus-enter {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand .side-focus-enter {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+}
