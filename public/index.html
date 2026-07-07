@@ -6,7 +6,22 @@
     <title>Metal Watch</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
-  <body>
+  <body class="focus-mode" data-focus-tab="prices">
+    <!-- Focus 헤더 (focus 모드 전용) — 우측 상단 X + 상단 탭 [단가/분석] -->
+    <div class="focus-bar" id="focusBar">
+      <div class="focus-tabs" role="tablist">
+        <button class="focus-tab active" data-focus-target="prices" type="button" role="tab" aria-selected="true">
+          <span class="focus-tab-icon" aria-hidden="true">📊</span>
+          <span>단가 테이블</span>
+        </button>
+        <button class="focus-tab" data-focus-target="analysis" type="button" role="tab" aria-selected="false">
+          <span class="focus-tab-icon" aria-hidden="true">📷</span>
+          <span>분석표</span>
+        </button>
+      </div>
+      <button class="focus-close" id="focusCloseBtn" type="button" aria-label="focus 모드 닫기 (메뉴 열기)">×</button>
+    </div>
+
     <div class="app-shell">
       <aside class="sidebar" aria-label="주요 메뉴">
         <div class="brand">
@@ -17,6 +32,11 @@
           </div>
         </div>
         <nav class="side-nav">
+          <button class="side-focus-enter" id="sideFocusEnterBtn" type="button">
+            <span aria-hidden="true">📊</span>
+            <span>단가·분석표 화면</span>
+          </button>
+          <div class="side-nav-divider" aria-hidden="true"></div>
           <button class="active" data-view="dashboard">대시보드</button>
           <button data-view="prices">시세표</button>
           <button data-view="detail">상세 차트</button>
@@ -28,6 +48,10 @@
 
       <main class="content">
         <header class="topbar">
+          <button class="focus-enter-btn" id="focusEnterBtn" type="button">
+            <span class="focus-enter-icon" aria-hidden="true">📊</span>
+            <span>단가·분석표 화면으로</span>
+          </button>
           <div class="update-badge">
             <span>최종 업데이트 <em>(수집시간)</em></span>
             <strong id="updatedAt">-</strong>

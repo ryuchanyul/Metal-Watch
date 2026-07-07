@@ -1559,6 +1559,50 @@ if (els.welcomeModal) {
   });
 }
 
+// ===== Focus 모드 (단가/분석 원터치 UX) =====
+function enterFocusMode(tab = "prices") {
+  document.body.classList.add("focus-mode");
+  document.body.setAttribute("data-focus-tab", tab);
+  document.querySelectorAll(".focus-tab").forEach((btn) => {
+    const active = btn.dataset.focusTarget === tab;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  setView(tab); // "prices" 또는 "analysis"
+  window.scrollTo({ top: 0 });
+}
+
+function exitFocusMode() {
+  document.body.classList.remove("focus-mode");
+  document.body.removeAttribute("data-focus-tab");
+  setView("dashboard");
+  window.scrollTo({ top: 0 });
+}
+
+// focus-bar 탭 클릭
+document.querySelectorAll(".focus-tab").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.focusTarget;
+    if (target) enterFocusMode(target);
+  });
+});
+
+// focus X 닫기
+const focusCloseBtn = document.querySelector("#focusCloseBtn");
+if (focusCloseBtn) {
+  focusCloseBtn.addEventListener("click", exitFocusMode);
+}
+
+// 일반 모드에서 focus 재진입 버튼 (topbar + 사이드바)
+const focusEnterBtn = document.querySelector("#focusEnterBtn");
+if (focusEnterBtn) {
+  focusEnterBtn.addEventListener("click", () => enterFocusMode("prices"));
+}
+const sideFocusEnterBtn = document.querySelector("#sideFocusEnterBtn");
+if (sideFocusEnterBtn) {
+  sideFocusEnterBtn.addEventListener("click", () => enterFocusMode("prices"));
+}
+
 updateTime();
 updateMonthlyAvgLabels();
 renderAll();
@@ -1566,5 +1610,5 @@ renderCalcTable("A");
 renderCalcTable("B");
 loadLivePrices();
 
-// 페이지 첫 진입 시 모달 표시 (대시보드 위에 오버레이)
-openWelcomeModal();
+// 초기 진입 = focus 모드 + 단가 테이블 (body class는 HTML에서 default 설정)
+setView("prices");
