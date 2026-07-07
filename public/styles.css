@@ -2425,3 +2425,48 @@ body.focus-mode #prices .section-heading {
     letter-spacing: -0.2px;
   }
 }
+
+/* ===== 모바일 사이드바 정리 — 초기화면 버튼 풀폭 + nav 6개 배치 ===== */
+@media (max-width: 920px) {
+  /* 초기화면 버튼은 항상 한 줄 전체 차지 (grid 자식이지만 span 처리) */
+  .side-focus-enter {
+    grid-column: 1 / -1;
+    justify-content: center;
+    padding: 14px 16px;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  /* 구분선도 풀폭 */
+  .side-nav-divider {
+    grid-column: 1 / -1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+    margin: 4px 0 8px;
+  }
+
+  /* nav 항목 6개를 3열 x 2행으로 정리 (5열 대신) */
+  .side-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  /* nav 버튼 컴팩트 */
+  .side-nav button:not(.side-focus-enter) {
+    text-align: center;
+    padding: 10px 6px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .side-focus-enter {
+    padding: 12px 14px;
+    font-size: 14px;
+  }
+  .side-nav button:not(.side-focus-enter) {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+}
