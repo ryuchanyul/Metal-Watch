@@ -2573,3 +2573,21 @@ body.focus-mode #prices .section-heading {
     font-size: 11px;
   }
 }
+
+/* 시세표보기 글자만 크게 (버튼 크기는 padding 그대로 유지) */
+.brand .side-focus-enter {
+  font-size: 16px !important;
+  font-weight: 900 !important;
+}
+
+@media (max-width: 920px) {
+  .brand .side-focus-enter {
+    font-size: 15px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand .side-focus-enter {
+    font-size: 14px !important;
+  }
+}
