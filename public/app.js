@@ -238,6 +238,7 @@ const analysisState = {
 const els = {
   updatedAt: document.querySelector("#updatedAt"),
   exchangeRate: document.querySelector("#exchangeRate"),
+  headerExchange: document.querySelector("#headerExchange"),
   topGain: document.querySelector("#topGain"),
   topLoss: document.querySelector("#topLoss"),
   commodityCards: document.querySelector("#commodityCards"),
@@ -356,6 +357,7 @@ function renderDashboard() {
   const loss = ranked[ranked.length - 1];
 
   els.exchangeRate.textContent = formatter.krw(exchangeRate);
+  if (els.headerExchange) els.headerExchange.textContent = formatter.krw(exchangeRate);
 
   renderTopChange(els.topGain, gain.symbol, changePercent(gain));
   renderTopChange(els.topLoss, loss.symbol, changePercent(loss));

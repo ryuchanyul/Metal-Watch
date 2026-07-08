@@ -2637,3 +2637,34 @@ body.focus-mode #prices .section-heading {
     min-height: 28px !important;
   }
 }
+
+/* 시세표 헤더 환율 배지 (시세 갱신 버튼 앞) */
+.header-exchange {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--surface-soft, #f6f8fa);
+  border: 1px solid var(--line, #dbe3e8);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted, #6d7b88);
+  white-space: nowrap;
+}
+
+.header-exchange strong {
+  color: var(--ink, #15202b);
+  font-weight: 900;
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .header-exchange {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .header-exchange strong {
+    font-size: 13px;
+  }
+}
