@@ -2723,3 +2723,31 @@ body.focus-mode #prices #refreshPrices {
     font-size: 12px !important;
   }
 }
+
+/* focus 모드 시세표 헤더 — 강력한 flex row 강제 (기존 CSS 완전 override) */
+body.focus-mode #prices .section-heading {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 8px 0 !important;
+  margin: 0 !important;
+}
+body.focus-mode #prices .table-tools {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  width: auto !important;
+  align-items: center !important;
+  min-width: 0 !important;
+}
+body.focus-mode #prices .header-exchange,
+body.focus-mode #prices #refreshPrices {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
