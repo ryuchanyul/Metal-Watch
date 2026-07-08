@@ -2696,3 +2696,30 @@ body.focus-mode #prices #refreshPrices {
     white-space: nowrap;
   }
 }
+
+/* focus 모드 시세표 헤더 버튼 확실히 컴팩트 (모바일) */
+@media (max-width: 480px) {
+  body.focus-mode #prices .section-heading {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  body.focus-mode #prices #refreshPrices {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    min-height: 30px !important;
+    height: auto !important;
+    line-height: 1.2 !important;
+    border-radius: 6px !important;
+  }
+  body.focus-mode #prices .header-exchange {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    height: auto !important;
+    min-height: 30px !important;
+    border-radius: 6px !important;
+  }
+  body.focus-mode #prices .header-exchange strong {
+    font-size: 12px !important;
+  }
+}
