@@ -141,6 +141,21 @@ async function downloadOne(page, target) {
   console.log(`[${target.symbol}] 저장 완료: ${filename}`);
 }
 
+async function downloadAll(page) {
+  let success = 0;
+  const failures = [];
+  for (const target of TARGETS) {
+    try {
+      await downloadOne(page, target);
+      success += 1;
+    } catch (error) {
+      console.error(`[${target.symbol}] 실패:`, error.message);
+      failures.push({ symbol: target.symbol, error: error.message });
+    }
+  }
+  return { success, failures };
+}
+
 async function main() {
   await setupDir();
 
@@ -153,37 +168,55 @@ async function main() {
     userAgent:
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
   });
-  const page = await context.newPage();
+  let page = await context.newPage();
 
-  let success = 0;
-  let failures = [];
+  // 1차 시도
+  let { success, failures } = await downloadAll(page);
+  console.log(`\n=== 1차 결과: ${success}/${TARGETS.length} 성공 ===`);
 
-  for (const target of TARGETS) {
-    try {
-      await downloadOne(page, target);
-      success += 1;
-    } catch (error) {
-      console.error(`[${target.symbol}] 실패:`, error.message);
-      failures.push({ symbol: target.symbol, error: error.message });
+  // 절반 이상 실패면 일시적 네트워크 이슈로 판단 → 10분 대기 후 2차 시도
+  const HALF = Math.ceil(TARGETS.length / 2);
+  if (success < HALF) {
+    console.log(`\n[1차 부족] ${success}/${TARGETS.length} — 10분 대기 후 재시도`);
+    if (failures.length) {
+      console.log("1차 실패 종목:");
+      failures.forEach((f) => console.log(`  - ${f.symbol}: ${f.error}`));
     }
+
+    await new Promise((r) => setTimeout(r, 10 * 60 * 1000));
+
+    // tmp/komis 초기화 + 페이지 새로 열기
+    await setupDir();
+    await page.close();
+    page = await context.newPage();
+
+    console.log(`\n[2차 시도] 시작`);
+    const result2 = await downloadAll(page);
+    success = result2.success;
+    failures = result2.failures;
+    console.log(`\n=== 2차 결과: ${success}/${TARGETS.length} 성공 ===`);
   }
 
   await browser.close();
 
-  console.log(`\n=== 결과: ${success}/${TARGETS.length} 성공 ===`);
   if (failures.length) {
-    console.log("실패 종목:");
+    console.log("최종 실패 종목:");
     failures.forEach((f) => console.log(`  - ${f.symbol}: ${f.error}`));
   }
 
-  // 일부 실패해도 workflow 다음 step(commit + backfill) 계속.
-  // 단 절반 이상 실패하면 fail (전반 문제로 간주, 사이트 다운 등).
+  // 재시도 후에도 완전 실패 → exit 1 (텔레그램 실패 알림 발동)
   if (success === 0) {
-    console.error("[중대 실패] 모든 종목 다운로드 실패 — 사이트 다운 또는 큰 변경");
+    console.error("[중대 실패] 재시도 후에도 모든 종목 다운로드 실패");
     process.exit(1);
   }
-  if (failures.length > success) {
-    console.warn(`[부분 실패] ${failures.length}건 실패, 그러나 ${success}건 성공 — 다음 step 계속`);
+  // 재시도 후에도 절반 이상 실패 → exit 1 (텔레그램 실패 알림 발동)
+  if (success < HALF) {
+    console.error(`[중대 실패] 재시도 후에도 절반 이상 실패 (${success}/${TARGETS.length})`);
+    process.exit(1);
+  }
+  // 일부만 실패 → 다음 step 계속 (알림 없음)
+  if (failures.length > 0) {
+    console.warn(`[부분 실패] ${failures.length}건 실패, ${success}건 성공 — 다음 step 계속`);
   }
 }
 
