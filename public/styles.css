@@ -2668,3 +2668,31 @@ body.focus-mode #prices .section-heading {
     font-size: 13px;
   }
 }
+
+/* focus 모드 시세표 헤더 — 모바일 한 줄 유지 (환율 + 시세 갱신) */
+body.focus-mode #prices .section-heading {
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+}
+body.focus-mode #prices .table-tools {
+  flex-wrap: nowrap !important;
+  width: auto !important;
+  gap: 6px !important;
+}
+body.focus-mode #prices .header-exchange,
+body.focus-mode #prices #refreshPrices {
+  flex-shrink: 0 !important;
+  width: auto !important;
+}
+
+@media (max-width: 480px) {
+  body.focus-mode #prices .header-exchange {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+  body.focus-mode #prices #refreshPrices {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+}
