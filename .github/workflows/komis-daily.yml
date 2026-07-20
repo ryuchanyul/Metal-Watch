@@ -1,9 +1,11 @@
 name: Daily KOMIS auto-download
 
-# 매일 KST 10:00 (01:00 UTC) — KOMIS 발표 시점 여유 확보
+# 매일 KST 10:00 (01:00 UTC) — LME 종목 커버
+# 매일 KST 22:00 (13:00 UTC) — 희소금속 발표 후 갱신
 on:
   schedule:
     - cron: "0 1 * * *"
+    - cron: "0 13 * * *"
   workflow_dispatch:
 
 jobs:

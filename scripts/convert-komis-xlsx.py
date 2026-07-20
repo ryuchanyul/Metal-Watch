@@ -83,10 +83,6 @@ def convert_one(xlsx_path: Path, symbol: str, factor: float) -> int:
     wb = openpyxl.load_workbook(xlsx_path, data_only=True)
     ws = wb["RsrcPrice"]
 
-    # DEBUG: xlsx 첫 3행 (최신순) — KOMIS 다운로드 시점 실제 데이터 확인
-    _dbg = list(ws.iter_rows(min_row=4, max_row=6, values_only=True))
-    print(f"  [debug {symbol}] xlsx 첫 3행: {[(r[0], r[1]) for r in _dbg if r[0]]}")
-
     rows = []
     for row in ws.iter_rows(min_row=4, values_only=True):
         if not row[0] or row[1] is None:
