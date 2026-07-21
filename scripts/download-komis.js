@@ -2,13 +2,14 @@
 // Playwright headless Chrome 사용. GitHub Actions 매일 실행용.
 
 import { chromium } from "playwright";
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const DOWNLOAD_DIR = join(here, "..", "tmp", "komis");
+const SCREEN_DIR = join(here, "..", "tmp", "komis-screen");
 
 // 한글 종목명 → 출력 파일명(영문 심볼)
 // 텅스텐은 광종 선택 후 가격기준(srchPrcCrtr)에서 WC/WO3를 구분.
@@ -48,7 +49,37 @@ async function setupDir() {
   if (existsSync(DOWNLOAD_DIR)) {
     await rm(DOWNLOAD_DIR, { recursive: true, force: true });
   }
+  if (existsSync(SCREEN_DIR)) {
+    await rm(SCREEN_DIR, { recursive: true, force: true });
+  }
   await mkdir(DOWNLOAD_DIR, { recursive: true });
+  await mkdir(SCREEN_DIR, { recursive: true });
+}
+
+// 화면 표에서 최근 데이터 스크랩 (검색 완료 후 호출)
+// KOMIS 페이지는 검색 결과를 여러 테이블로 표시. 첫 컬럼이 YYYY-MM-DD 패턴인 행만 추출.
+async function scrapeScreenTable(page, limit = 15) {
+  return page.evaluate((maxRows) => {
+    const results = [];
+    const seen = new Set();
+    document.querySelectorAll("tbody tr").forEach((tr) => {
+      if (results.length >= maxRows) return;
+      const cells = tr.querySelectorAll("td");
+      if (cells.length < 2) return;
+      const dateText = (cells[0].textContent || "").trim();
+      const priceText = (cells[1].textContent || "").trim().replace(/,/g, "");
+      // YYYY-MM-DD 또는 YYYY.MM.DD 형식
+      const m = dateText.match(/^(\d{4})[-.](\d{2})[-.](\d{2})$/);
+      if (!m) return;
+      const iso = `${m[1]}-${m[2]}-${m[3]}`;
+      if (seen.has(iso)) return;
+      const price = Number(priceText);
+      if (!Number.isFinite(price) || price <= 0) return;
+      seen.add(iso);
+      results.push({ date: iso, price });
+    });
+    return results;
+  }, limit);
 }
 
 // 페이지에서 select 옵션 목록 추출 (제네릭)
@@ -121,6 +152,20 @@ async function downloadOne(page, target) {
   // 검색 버튼 클릭
   await page.click('button:has-text("검색"), a:has-text("검색"), [onclick*="onSearch"]');
   await page.waitForLoadState("networkidle", { timeout: FETCH_TIMEOUT });
+
+  // 화면 표 최근 데이터 스크랩 (xlsx 캐시 지연 대비)
+  try {
+    const screenRows = await scrapeScreenTable(page, 15);
+    if (screenRows.length > 0) {
+      const screenPath = join(SCREEN_DIR, `${target.symbol}.json`);
+      await writeFile(screenPath, JSON.stringify(screenRows), "utf-8");
+      console.log(`[${target.symbol}] 화면 스크랩: ${screenRows.length}행 (최신 ${screenRows[0].date} ~ ${screenRows[screenRows.length-1].date})`);
+    } else {
+      console.warn(`[${target.symbol}] 화면 스크랩: 0행 (표 구조 확인 필요)`);
+    }
+  } catch (e) {
+    console.warn(`[${target.symbol}] 화면 스크랩 실패 (계속 진행):`, e.message);
+  }
 
   // 엑셀 다운로드 트리거
   const [download] = await Promise.all([
