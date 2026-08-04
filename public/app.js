@@ -182,6 +182,26 @@ let commodities = [
     source: "KOMIS"
   },
   {
+    symbol: "Rh",
+    name: "Rh(로듐)",
+    spec: "Kitco spot (USD/oz 원본, PGM)",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "Kitco"
+  },
+  {
+    symbol: "Ir",
+    name: "Ir(이리듐)",
+    spec: "정련업체 견적 기준 (자동 수집 불가)",
+    usd: 150000,
+    usdRange: 30000,
+    isEstimate: true,
+    monthlyAvg: 150000,
+    unit: "USD/kg",
+    source: "Manual estimate (필요시 수동 갱신)"
+  },
+  {
     symbol: "Mg",
     name: "Mg(마그네슘)",
     spec: "99.9%min FOB China",
