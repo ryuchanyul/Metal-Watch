@@ -471,7 +471,12 @@ function renderPriceTable() {
   document.querySelectorAll("#priceRows .clickable-row").forEach((row) => {
     row.addEventListener("click", () => {
       selectCommodity(row.dataset.symbol);
-      setView("detail");
+      // focus 모드일 때는 해제하면서 상세 차트로 이동 (setView만 하면 CSS 때문에 안 보임)
+      if (document.body.classList.contains("focus-mode")) {
+        exitFocusMode("detail");
+      } else {
+        setView("detail");
+      }
     });
   });
 
@@ -480,7 +485,11 @@ function renderPriceTable() {
     els.welcomePriceRows.querySelectorAll(".clickable-row").forEach((row) => {
       row.addEventListener("click", () => {
         selectCommodity(row.dataset.symbol);
-        setView("detail");
+        if (document.body.classList.contains("focus-mode")) {
+          exitFocusMode("detail");
+        } else {
+          setView("detail");
+        }
         closeWelcomeModal();
       });
     });
@@ -1601,10 +1610,10 @@ function enterFocusMode(tab = "prices") {
   window.scrollTo({ top: 0 });
 }
 
-function exitFocusMode() {
+function exitFocusMode(targetView = "dashboard") {
   document.body.classList.remove("focus-mode");
   document.body.removeAttribute("data-focus-tab");
-  setView("dashboard");
+  setView(targetView);
   window.scrollTo({ top: 0 });
 }
 
