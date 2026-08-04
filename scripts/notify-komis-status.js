@@ -18,19 +18,20 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   process.exit(0);
 }
 
-const KOMIS_SOURCE = "KOMIS (광해광업공단)";
+// 대상 심볼 — KOMIS + JM PGM (Rh/Ir)까지 모두 커버
+// source 필터 없이 각 심볼의 가장 최신 데이터를 그대로 사용 (소스 무관)
 const SYMBOLS = [
   "Cu", "Al", "Ni", "Pb", "Zn", "Sn",
-  "Au", "Ag",
-  "Co", "Li", "Mn", "Mo", "W_WC", "W_WO3", "Mg", "Ti", "In"
+  "Au", "Ag", "Pd",
+  "Co", "Li", "Mn", "Mo", "W_WC", "W_WO3", "Mg", "Ti", "In",
+  "Rh", "Ir"
 ];
 
 async function getLatestDate(symbol) {
   const url =
     `${SUPABASE_URL}/rest/v1/price_snapshots` +
     `?symbol=eq.${symbol}` +
-    `&source=eq.${encodeURIComponent(KOMIS_SOURCE)}` +
-    `&order=collected_at.desc&limit=1&select=collected_at`;
+    `&order=collected_at.desc&limit=1&select=collected_at,source`;
   const res = await fetch(url, {
     headers: {
       apikey: SUPABASE_SERVICE_KEY,
@@ -39,25 +40,40 @@ async function getLatestDate(symbol) {
   });
   if (!res.ok) return null;
   const data = await res.json();
-  return data[0]?.collected_at?.slice(0, 10) || null;
+  if (!data[0]) return null;
+  return {
+    date: data[0].collected_at.slice(0, 10),
+    source: data[0].source
+  };
+}
+
+// source 짧은 라벨 (텔레그램 메시지 간결화)
+function shortSource(source) {
+  if (!source) return "?";
+  if (source.startsWith("KOMIS")) return "KOMIS";
+  if (source === "Johnson Matthey") return "JM";
+  if (source === "Trading Economics") return "TE";
+  if (source.startsWith("Manual")) return "manual";
+  return source;
 }
 
 async function main() {
-  // 종목별 최신 날짜 수집 (병렬)
+  // 종목별 최신 날짜 + 소스 수집 (병렬)
   const entries = await Promise.all(
     SYMBOLS.map(async (sym) => [sym, await getLatestDate(sym)])
   );
 
-  // 날짜별 종목 그룹화 (최신 날짜부터)
+  // 날짜별 종목 그룹화 (최신 날짜부터). 심볼은 "Rh(JM)" 같은 형태
   const byDate = {};
-  let missing = [];
-  for (const [sym, date] of entries) {
-    if (!date) {
+  const missing = [];
+  for (const [sym, info] of entries) {
+    if (!info) {
       missing.push(sym);
       continue;
     }
-    if (!byDate[date]) byDate[date] = [];
-    byDate[date].push(sym);
+    const label = `${sym}(${shortSource(info.source)})`;
+    if (!byDate[info.date]) byDate[info.date] = [];
+    byDate[info.date].push(label);
   }
 
   const sortedDates = Object.keys(byDate).sort().reverse();
@@ -78,7 +94,7 @@ async function main() {
     ? `https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`
     : "";
 
-  const text = `✅ [Metal Watch] KOMIS 일일 수집 완료
+  const text = `✅ [Metal Watch] 일일 수집 완료 (KOMIS + JM PGM)
 
 실행 시각: ${kstNow} KST
 실행 ID: #${GITHUB_RUN_ID || "-"}
