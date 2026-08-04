@@ -37,6 +37,7 @@ SYMBOLS = {
     "w_wo3": 1.0,
     "au":    32.1507, # USD/oz → USD/kg (KOMIS EtcMnrl 페이지)
     "ag":    32.1507,
+    "pd":    32.1507, # 팔라듐 USD/oz → USD/kg
     "mg":    0.001,   # USD/T → USD/kg
     "ti":    1.0,     # USD/kg 그대로
     "in":    1.0,     # USD/kg 그대로

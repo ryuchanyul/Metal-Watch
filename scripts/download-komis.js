@@ -34,7 +34,8 @@ const TARGETS = [
   { category: "MinorMetals", korean: "인듐",     symbol: "in" },
   // 귀금속 (EtcMnrl 페이지) — 2026-06-19 KOMIS 카테고리 이동 확인 후 복구
   { category: "EtcMnrl", korean: "금", symbol: "au" },
-  { category: "EtcMnrl", korean: "은", symbol: "ag" }
+  { category: "EtcMnrl", korean: "은", symbol: "ag" },
+  { category: "EtcMnrl", korean: "팔라듐", symbol: "pd" }
 ];
 
 const CATEGORY_URL = {

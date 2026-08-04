@@ -33,6 +33,7 @@ const SYMBOLS = [
   { file: "w_wo3", db: "W_WO3", rawUnit: "USD/kg" },
   { file: "au",    db: "Au",    rawUnit: "USD/oz" },
   { file: "ag",    db: "Ag",    rawUnit: "USD/oz" },
+  { file: "pd",    db: "Pd",    rawUnit: "USD/oz" },
   { file: "mg",    db: "Mg",    rawUnit: "USD/T" },
   { file: "ti",    db: "Ti",    rawUnit: "USD/kg" },
   { file: "in",    db: "In",    rawUnit: "USD/kg" }

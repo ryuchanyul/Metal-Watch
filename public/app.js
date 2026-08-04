@@ -173,6 +173,15 @@ let commodities = [
     source: "KOMIS"
   },
   {
+    symbol: "Pd",
+    name: "Pd(팔라듐)",
+    spec: "LBMA 99.95% (USD/oz 원본)",
+    usd: 0,
+    monthlyAvg: 0,
+    unit: "USD/kg",
+    source: "KOMIS"
+  },
+  {
     symbol: "Mg",
     name: "Mg(마그네슘)",
     spec: "99.9%min FOB China",
