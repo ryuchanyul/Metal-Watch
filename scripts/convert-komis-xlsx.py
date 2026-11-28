@@ -24,7 +24,9 @@ except ImportError:
 # symbol → factor (raw × factor = USD/kg)
 SYMBOLS = {
     "li":    1.0,
-    "co":    1.0,
+    # co: KOMIS 코발트 원본은 USD/MT (metric ton) 단위. 2026-11-28 사고에서 발견 —
+    #   factor=1.0으로 되어 있어 $31,265/MT가 $31,265/kg로 저장돼 있었음 (1,000배 오류).
+    "co":    0.001,
     "mn":    0.001,
     "ni":    0.001,
     "cu":    0.001,

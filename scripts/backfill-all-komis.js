@@ -20,7 +20,7 @@ const CHUNK_SIZE = 500;
 // 파일명 → DB 심볼 + 원본 단위
 const SYMBOLS = [
   { file: "li",    db: "Li",    rawUnit: "USD/kg" },
-  { file: "co",    db: "Co",    rawUnit: "USD/kg" },
+  { file: "co",    db: "Co",    rawUnit: "USD/MT" }, // 2026-11-28 USD/kg에서 수정
   { file: "mn",    db: "Mn",    rawUnit: "USD/mt" },
   { file: "ni",    db: "Ni",    rawUnit: "USD/ton" },
   { file: "cu",    db: "Cu",    rawUnit: "USD/ton" },
