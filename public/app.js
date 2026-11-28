@@ -1325,21 +1325,38 @@ function showInventoryDetail(rec) {
   const date = rec.created_at ? new Date(rec.created_at) : null;
   const dateStr = date ? date.toLocaleString("ko-KR") : "-";
 
-  const fmtUsd = (v) => v != null && Number.isFinite(v) ? "$" + Number(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "-";
-  const fmtKrw = (v) => v != null && Number.isFinite(v) ? formatter.krw(v) : "-";
+  // 숫자 필드는 Number로 강제 변환 후 isFinite 체크 → 비숫자는 "-"
+  // 공격자가 저장형 XSS로 숫자 자리에 페이로드를 넣어도 NaN 처리되어 안전.
+  const num = (v) => {
+    if (v == null) return null; // null/undefined 명시 분기 (Number(null) = 0 회피)
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const fmtUsd = (v) => {
+    const n = num(v);
+    return n != null ? "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "-";
+  };
+  const fmtKrw = (v) => {
+    const n = num(v);
+    return n != null ? formatter.krw(n) : "-";
+  };
+  const fmtNum = (v, decimals = 0) => {
+    const n = num(v);
+    return n != null ? n.toFixed(decimals) : "-";
+  };
 
   const renderTab = (tabKey, tabData) => {
     if (!tabData) return "";
     const metals = tabData.metals || [];
     const results = tabData.results || {};
-    const moisture = tabData.moisture ?? "-";
-    const totalQty = tabData.totalQty ?? "-";
+    const moisture = fmtNum(tabData.moisture, 1);
+    const totalQty = fmtNum(tabData.totalQty, 1);
     const metalRows = metals.map((m) => {
-      const payRate = tabData.payRates?.[m.symbol] ?? 100;
+      const payRate = num(tabData.payRates?.[m.symbol]) ?? 100;
       return `<tr>
         <td>${escapeHtml(m.name || m.symbol || "-")}</td>
-        <td>${m.content != null ? Number(m.content).toFixed(4) + "%" : "-"}</td>
-        <td>${payRate.toFixed?.(1) ?? payRate}%</td>
+        <td>${num(m.content) != null ? num(m.content).toFixed(4) + "%" : "-"}</td>
+        <td>${payRate.toFixed(1)}%</td>
       </tr>`;
     }).join("");
     return `
@@ -1352,7 +1369,7 @@ function showInventoryDetail(rec) {
         <div style="margin-top:8px;font-size:12px;color:#6b7280">수분 ${moisture}% · 총수량 ${totalQty}kg</div>
         <div class="detail-summary">
           <div class="detail-summary-card"><span>총액</span><strong>${fmtUsd(results.totalUsd)}</strong></div>
-          <div class="detail-summary-card"><span>단가 $/kg</span><strong>${results.usdPerKg != null ? "$" + Number(results.usdPerKg).toFixed(2) : "-"}</strong></div>
+          <div class="detail-summary-card"><span>단가 $/kg</span><strong>${fmtUsd(results.usdPerKg)}</strong></div>
           <div class="detail-summary-card"><span>단가 ₩/kg</span><strong>${fmtKrw(results.krwPerKg)}</strong></div>
         </div>
       </div>
@@ -1367,7 +1384,7 @@ function showInventoryDetail(rec) {
         <dt>성적서번호</dt><dd>${escapeHtml(rec.report_number || "-")}</dd>
         <dt>시험완료일</dt><dd>${escapeHtml(rec.test_date || "-")}</dd>
         <dt>발급기관</dt><dd>${escapeHtml(rec.issuer || "-")}</dd>
-        <dt>저장시점 환율</dt><dd>₩${rec.exchange_rate_snapshot?.toLocaleString("ko-KR") || "-"}</dd>
+        <dt>저장시점 환율</dt><dd>${num(rec.exchange_rate_snapshot) != null ? "₩" + num(rec.exchange_rate_snapshot).toLocaleString("ko-KR") : "-"}</dd>
         <dt>상태</dt><dd><span class="erp-status-pill ${detailStatus}">${detailStatus}</span></dd>
       </dl>
       ${renderTab("A", rec.tabs?.A)}
