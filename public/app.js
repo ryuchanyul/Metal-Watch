@@ -591,17 +591,10 @@ async function renderDetail() {
   drawYearChart(chartData, avg);
 }
 
-// 오늘 기준 N일 전 날짜를 "M/D" 형식으로 반환
-function dateLabel(daysAgo) {
-  const d = new Date();
-  d.setDate(d.getDate() - daysAgo);
-  return `${d.getMonth() + 1}/${d.getDate()}`;
-}
-
-// 오늘 기준 N개월 전 날짜를 "M/D" 형식으로 반환
-function monthLabel(monthsAgo) {
-  const d = new Date();
-  d.setMonth(d.getMonth() - monthsAgo);
+// 수집 시각(ISO 문자열)을 "M/D" 형식으로 반환. 값이 없으면 빈 문자열.
+function dateLabel(isoDate) {
+  if (!isoDate) return "";
+  const d = new Date(isoDate);
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
@@ -616,10 +609,12 @@ function buildPeriodData(history, period) {
   const values = filtered.map((row) => row.usd_per_kg);
   const dates = filtered.map((row) => row.collected_at);
 
-  const labels =
-    period === "1Y"
-      ? [monthLabel(11), monthLabel(6), monthLabel(0)]
-      : [dateLabel(daysBack - 1), dateLabel(Math.floor(daysBack / 2)), dateLabel(0)];
+  // 가로축은 실제 데이터의 처음·중간·마지막 날짜 (데이터가 끊기면 화면에 드러남)
+  const labels = [
+    dateLabel(dates[0]),
+    dateLabel(dates[Math.floor(dates.length / 2)]),
+    dateLabel(dates[dates.length - 1])
+  ];
 
   return { period, values, dates, labels };
 }

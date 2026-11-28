@@ -1,5 +1,5 @@
 // GET /api/history?symbol=Cu
-// 특정 종목의 전체 시계열을 Supabase에서 SELECT하여 반환.
+// 특정 종목의 최근 1년 시계열을 Supabase에서 SELECT하여 반환.
 
 import { fetchHistoryBySymbol } from "../lib/db.js";
 
