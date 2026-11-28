@@ -1,13 +1,33 @@
 // Ba 등 수동 입력 종목의 가격을 price_snapshots에 추가.
 //
-// 보안 포지션: 공개 엔드포인트 (사용자 요구).
-// - 2명 사용자용 폐쇄 환경
-// - SANITY_RANGE 가드로 극단값 차단 (가격 외 다른 영향 없음)
+// 보안 포지션 (사용자 명시 결정):
+// - 로그인/비밀번호 없음 — "운영쪽은 그런것 잘 모르고" 사용자 요구
+// - 2명 사용자용 폐쇄 환경, 수정 영향은 가격뿐
+// - SANITY_RANGE 가드로 극단값 차단
 // - symbol 화이트리스트로 Ba만 허용
+// - Origin 체크로 공식 앱 외부의 직접 호출 차단 (2026-11-28 보안 리뷰 반영)
 //
 // 요청: POST { symbol: 'Ba', usd_per_kg: 27.5, note?: '2026 Q4' }
 
 const { SUPABASE_URL, SUPABASE_SERVICE_KEY } = process.env;
+
+// Origin 화이트리스트 — Vercel 프로덕션/프리뷰 + 로컬 개발만 허용.
+// 공격자가 자신의 페이지나 curl로 직접 호출하는 것 차단 (CSRF 방어).
+// 운영자는 공식 사이트에서만 쓰므로 UX 영향 없음.
+function isAllowedOrigin(originStr) {
+  if (!originStr) return false;
+  try {
+    const u = new URL(originStr);
+    if (u.hostname === "localhost" || u.hostname === "127.0.0.1") return true;
+    // Vercel 프로덕션/프리뷰. 공격자가 자기 앱명에 metal-watch를 끼워넣는 우회를 막기 위해
+    // startsWith으로 엄격 매칭 (e.g. metal-watch-abc123.vercel.app ✓, evil-metal-watch.vercel.app ✗)
+    if (u.hostname === "metal-watch.vercel.app") return true;
+    if (u.hostname.startsWith("metal-watch-") && u.hostname.endsWith(".vercel.app")) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
 
 // 수동 입력 허용 심볼
 const ALLOWED_SYMBOLS = new Set(["Ba"]);
@@ -26,6 +46,12 @@ export default async function handler(req, res) {
   }
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
     return res.status(500).json({ error: "서버 설정이 완료되지 않았습니다." });
+  }
+
+  // Origin 체크 — 공식 사이트 외부 요청 차단
+  const origin = req.headers.origin || req.headers.referer;
+  if (!isAllowedOrigin(origin)) {
+    return res.status(403).json({ error: "허용되지 않은 출처입니다." });
   }
 
   const body = req.body || {};
