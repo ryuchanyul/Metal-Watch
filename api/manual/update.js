@@ -1,33 +1,20 @@
 // Ba 등 수동 입력 종목의 가격을 price_snapshots에 추가.
 //
-// 보안 포지션 (사용자 명시 결정):
-// - 로그인/비밀번호 없음 — "운영쪽은 그런것 잘 모르고" 사용자 요구
-// - 2명 사용자용 폐쇄 환경, 수정 영향은 가격뿐
+// 보안 포지션:
+// - 운영자 UX: 비밀번호 입력 없음 (사용자 명시: "운영쪽은 그런것 잘 모르고")
+// - 서버 인증: HttpOnly 세션 쿠키 HMAC 검증 (사용자 명시: "서버는 절대 비번이 있어야지!")
+//   → ADMIN_TOKEN 환경변수로 서명. 사이트 접속 시 /api/session이 자동으로 쿠키 발급.
+//   → 외부 curl / 다른 사이트에서 호출 시 쿠키 없음 → 401.
+//   → XSS 발생해도 HttpOnly라 토큰 탈취 불가.
 // - SANITY_RANGE 가드로 극단값 차단
 // - symbol 화이트리스트로 Ba만 허용
-// - Origin 체크로 공식 앱 외부의 직접 호출 차단 (2026-11-28 보안 리뷰 반영)
+// - Origin 체크 (ALLOWED_ORIGINS 환경변수의 정확 매칭)
 //
 // 요청: POST { symbol: 'Ba', usd_per_kg: 27.5, note?: '2026 Q4' }
 
-const { SUPABASE_URL, SUPABASE_SERVICE_KEY } = process.env;
+import { verifySessionCookie, isAllowedOrigin } from "../../lib/session.js";
 
-// Origin 화이트리스트 — Vercel 프로덕션/프리뷰 + 로컬 개발만 허용.
-// 공격자가 자신의 페이지나 curl로 직접 호출하는 것 차단 (CSRF 방어).
-// 운영자는 공식 사이트에서만 쓰므로 UX 영향 없음.
-function isAllowedOrigin(originStr) {
-  if (!originStr) return false;
-  try {
-    const u = new URL(originStr);
-    if (u.hostname === "localhost" || u.hostname === "127.0.0.1") return true;
-    // Vercel 프로덕션/프리뷰. 공격자가 자기 앱명에 metal-watch를 끼워넣는 우회를 막기 위해
-    // startsWith으로 엄격 매칭 (e.g. metal-watch-abc123.vercel.app ✓, evil-metal-watch.vercel.app ✗)
-    if (u.hostname === "metal-watch.vercel.app") return true;
-    if (u.hostname.startsWith("metal-watch-") && u.hostname.endsWith(".vercel.app")) return true;
-    return false;
-  } catch {
-    return false;
-  }
-}
+const { SUPABASE_URL, SUPABASE_SERVICE_KEY, ADMIN_TOKEN } = process.env;
 
 // 수동 입력 허용 심볼
 const ALLOWED_SYMBOLS = new Set(["Ba"]);
@@ -44,7 +31,7 @@ export default async function handler(req, res) {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "POST만 허용됩니다." });
   }
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !ADMIN_TOKEN) {
     return res.status(500).json({ error: "서버 설정이 완료되지 않았습니다." });
   }
 
@@ -52,6 +39,11 @@ export default async function handler(req, res) {
   const origin = req.headers.origin || req.headers.referer;
   if (!isAllowedOrigin(origin)) {
     return res.status(403).json({ error: "허용되지 않은 출처입니다." });
+  }
+
+  // 세션 쿠키 인증
+  if (!verifySessionCookie(req, ADMIN_TOKEN)) {
+    return res.status(401).json({ error: "세션이 없거나 만료되었습니다. 페이지를 새로고침해 주세요." });
   }
 
   const body = req.body || {};

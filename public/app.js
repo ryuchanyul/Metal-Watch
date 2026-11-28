@@ -750,6 +750,7 @@ async function saveManualPrice() {
     const res = await fetch("/api/manual/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({ symbol: manualTargetSymbol, usd_per_kg: newPrice })
     });
     const data = await res.json().catch(() => ({}));
@@ -1375,6 +1376,7 @@ async function saveAnalysis() {
     const res = await fetch("/api/analysis/save", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify(body)
     });
     const data = await res.json();
@@ -1443,7 +1445,7 @@ function setInventoryStatus(message, kind = "info") {
 async function loadInventory() {
   setInventoryStatus("불러오는 중...");
   try {
-    const res = await fetch("/api/analysis/list?limit=100");
+    const res = await fetch("/api/analysis/list?limit=100", { credentials: "same-origin" });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
     inventoryRecords = data.records || [];
@@ -1863,12 +1865,22 @@ if (sideFocusEnterBtn) {
   sideFocusEnterBtn.addEventListener("click", () => enterFocusMode("prices"));
 }
 
+// 세션 쿠키 발급 — 서버 인증(ADMIN_TOKEN 기반 HMAC). 운영자는 비밀번호 입력 안 함.
+// 실패해도 UI는 로드 (조회 API들이 401을 돌려주면 그때 사용자 안내).
+async function initSession() {
+  try {
+    await fetch("/api/session", { credentials: "same-origin" });
+  } catch (e) {
+    console.warn("[session] 발급 실패:", e.message);
+  }
+}
+
 updateTime();
 updateMonthlyAvgLabels();
 renderAll();
 renderCalcTable("A");
 renderCalcTable("B");
-loadLivePrices();
+initSession().then(() => loadLivePrices());
 
 // 초기 진입 = focus 모드 + 단가 테이블 (body class는 HTML에서 default 설정)
 setView("prices");

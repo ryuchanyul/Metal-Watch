@@ -1,14 +1,25 @@
 // POST /api/analysis/save
 // 분석표 결과를 Supabase analysis_records 테이블에 저장.
+// 인증: HttpOnly 세션 쿠키 HMAC 검증 (lib/session.js)
+
+import { verifySessionCookie, isAllowedOrigin } from "../../lib/session.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "POST only" });
   }
 
-  const { SUPABASE_URL, SUPABASE_SERVICE_KEY } = process.env;
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    return res.status(500).json({ error: "Supabase env not configured" });
+  const { SUPABASE_URL, SUPABASE_SERVICE_KEY, ADMIN_TOKEN } = process.env;
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !ADMIN_TOKEN) {
+    return res.status(500).json({ error: "서버 설정 미완료" });
+  }
+
+  const origin = req.headers.origin || req.headers.referer;
+  if (!isAllowedOrigin(origin)) {
+    return res.status(403).json({ error: "허용되지 않은 출처입니다." });
+  }
+  if (!verifySessionCookie(req, ADMIN_TOKEN)) {
+    return res.status(401).json({ error: "세션이 없거나 만료되었습니다. 페이지를 새로고침해 주세요." });
   }
 
   const body = req.body || {};
