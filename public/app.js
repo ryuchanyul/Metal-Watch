@@ -652,14 +652,18 @@ function renderManualNoticeBar(selected) {
   els.manualNoticeBadge.textContent = badge.label;
   els.manualNoticeBadge.className = `manual-notice-badge ${badge.cls}`;
 
-  // 안내 문구
-  const QUARTER_GUIDE = "1월1일, 3월1일, 6월1일, 9월1일에 1회 수작업 입력이 필요합니다.";
-  if (lastIso) {
-    const dateStr = new Date(lastIso).toISOString().slice(0, 10);
-    els.manualNoticeText.textContent = `마지막 갱신: ${dateStr} (${daysAgo}일 전) · ${QUARTER_GUIDE}`;
-  } else {
-    els.manualNoticeText.textContent = QUARTER_GUIDE;
-  }
+  // 안내 문구: 1행 = 마지막 입력 일자(강조), 2행 = 분기 안내 + 참고 소스
+  // 참고 소스 변경 시 아래 REFERENCE_SOURCES만 수정.
+  const QUARTER_GUIDE = "1월1일, 3월1일, 6월1일, 9월1일에 1회 수작업 입력";
+  const REFERENCE_SOURCES = "참고: 공급사 견적 · SMM(metal.com)";
+
+  const lastLine = lastIso
+    ? `마지막 입력: ${escapeHtml(new Date(lastIso).toISOString().slice(0, 10))} (${daysAgo}일 전)`
+    : "입력된 가격 없음";
+
+  els.manualNoticeText.innerHTML =
+    `<strong class="manual-notice-last">${lastLine}</strong>` +
+    `<span class="manual-notice-sub">${escapeHtml(QUARTER_GUIDE)} · ${escapeHtml(REFERENCE_SOURCES)}</span>`;
 
   els.manualNoticeBar.hidden = false;
 }

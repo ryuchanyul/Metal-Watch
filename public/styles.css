@@ -2815,6 +2815,23 @@ body.focus-mode #prices #refreshPrices {
 .manual-notice-text {
   color: #475569;
   font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  min-width: 0;
+}
+.manual-notice-last {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.manual-notice-sub {
+  font-size: 12px;
+  color: #64748b;
   overflow: hidden;
   text-overflow: ellipsis;
 }
