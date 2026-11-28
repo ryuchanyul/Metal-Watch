@@ -14,6 +14,25 @@ const formatter = {
   }
 };
 
+// HTML 이스케이프 — 사용자 입력이 innerHTML에 삽입될 때 반드시 적용 (저장형 XSS 차단)
+// DB에서 읽어온 시료명·성적서번호·메모 등 자유 입력 필드에 사용.
+function escapeHtml(str) {
+  if (str == null) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// erp_status는 CSS class와 텍스트 양쪽에 들어가므로 whitelist 처리
+// 허용된 값이 아니면 "draft"로 강제 (CSS injection 방지)
+const ALLOWED_ERP_STATUS = new Set(["draft", "confirmed", "rejected", "shipped"]);
+function safeErpStatus(value) {
+  return ALLOWED_ERP_STATUS.has(value) ? value : "draft";
+}
+
 let exchangeRate = 1507.82;
 let selectedPeriod = "1Y";
 
@@ -1284,14 +1303,14 @@ function renderInventoryList(records) {
     const aKrw = a?.krwPerKg != null ? formatter.krw(a.krwPerKg) : "-";
     const bKrw = b?.krwPerKg != null ? formatter.krw(b.krwPerKg) : "-";
     const notes = (rec.notes || "").substring(0, 20) + (rec.notes?.length > 20 ? "..." : "");
-    const status = rec.erp_status || "draft";
+    const status = safeErpStatus(rec.erp_status);
     tr.innerHTML = `
-      <td>${dateStr}</td>
-      <td><strong>${rec.sample_name || "-"}</strong></td>
-      <td>${rec.report_number || "-"}</td>
+      <td>${escapeHtml(dateStr)}</td>
+      <td><strong>${escapeHtml(rec.sample_name || "-")}</strong></td>
+      <td>${escapeHtml(rec.report_number || "-")}</td>
       <td class="num">${aKrw}</td>
       <td class="num">${bKrw}</td>
-      <td>${notes || "-"}</td>
+      <td>${escapeHtml(notes || "-")}</td>
       <td><span class="erp-status-pill ${status}">${status}</span></td>
     `;
     tr.addEventListener("click", () => showInventoryDetail(rec));
@@ -1318,14 +1337,14 @@ function showInventoryDetail(rec) {
     const metalRows = metals.map((m) => {
       const payRate = tabData.payRates?.[m.symbol] ?? 100;
       return `<tr>
-        <td>${m.name || m.symbol || "-"}</td>
+        <td>${escapeHtml(m.name || m.symbol || "-")}</td>
         <td>${m.content != null ? Number(m.content).toFixed(4) + "%" : "-"}</td>
         <td>${payRate.toFixed?.(1) ?? payRate}%</td>
       </tr>`;
     }).join("");
     return `
       <div class="detail-tab-block">
-        <h3>습식 ${tabKey}</h3>
+        <h3>습식 ${escapeHtml(tabKey)}</h3>
         <table>
           <thead><tr><th>메탈</th><th>함량</th><th>지불률</th></tr></thead>
           <tbody>${metalRows || `<tr><td colspan="3" style="text-align:center;color:#9ca3af">메탈 없음</td></tr>`}</tbody>
@@ -1340,19 +1359,20 @@ function showInventoryDetail(rec) {
     `;
   };
 
+  const detailStatus = safeErpStatus(rec.erp_status);
   els.inventoryDetailBody.innerHTML = `
     <div class="inventory-detail-body">
       <dl class="detail-meta">
-        <dt>저장일시</dt><dd>${dateStr}</dd>
-        <dt>성적서번호</dt><dd>${rec.report_number || "-"}</dd>
-        <dt>시험완료일</dt><dd>${rec.test_date || "-"}</dd>
-        <dt>발급기관</dt><dd>${rec.issuer || "-"}</dd>
+        <dt>저장일시</dt><dd>${escapeHtml(dateStr)}</dd>
+        <dt>성적서번호</dt><dd>${escapeHtml(rec.report_number || "-")}</dd>
+        <dt>시험완료일</dt><dd>${escapeHtml(rec.test_date || "-")}</dd>
+        <dt>발급기관</dt><dd>${escapeHtml(rec.issuer || "-")}</dd>
         <dt>저장시점 환율</dt><dd>₩${rec.exchange_rate_snapshot?.toLocaleString("ko-KR") || "-"}</dd>
-        <dt>상태</dt><dd><span class="erp-status-pill ${rec.erp_status || "draft"}">${rec.erp_status || "draft"}</span></dd>
+        <dt>상태</dt><dd><span class="erp-status-pill ${detailStatus}">${detailStatus}</span></dd>
       </dl>
       ${renderTab("A", rec.tabs?.A)}
       ${renderTab("B", rec.tabs?.B)}
-      ${rec.notes ? `<div class="detail-notes"><strong>메모</strong><br/>${rec.notes}</div>` : ""}
+      ${rec.notes ? `<div class="detail-notes"><strong>메모</strong><br/>${escapeHtml(rec.notes)}</div>` : ""}
     </div>
   `;
 
