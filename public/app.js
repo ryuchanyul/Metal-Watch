@@ -564,10 +564,12 @@ function selectCommodity(symbol) {
 // 종목별 history 캐시 (같은 symbol 두 번 fetch 안 함)
 const historyCache = new Map();
 
-async function fetchHistory(symbol) {
-  if (historyCache.has(symbol)) return historyCache.get(symbol);
+async function fetchHistory(symbol, { forceRefresh = false } = {}) {
+  if (!forceRefresh && historyCache.has(symbol)) return historyCache.get(symbol);
   try {
-    const res = await fetch(`/api/history?symbol=${encodeURIComponent(symbol)}`);
+    // forceRefresh: query string에 timestamp 붙여 Vercel Edge Cache 우회
+    const bust = forceRefresh ? `&_t=${Date.now()}` : "";
+    const res = await fetch(`/api/history?symbol=${encodeURIComponent(symbol)}${bust}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     const rows = Array.isArray(data.rows) ? data.rows : [];
@@ -579,7 +581,7 @@ async function fetchHistory(symbol) {
   }
 }
 
-async function renderDetail() {
+async function renderDetail({ forceRefresh = false } = {}) {
   const selected =
     commodities.find((item) => item.symbol === selectedSymbol) ||
     commodities[0];
@@ -590,7 +592,7 @@ async function renderDetail() {
   // 자동 수집 종목은 안내 바 숨김 (hidden 유지)
   renderManualNoticeBar(selected);
 
-  const history = await fetchHistory(selected.symbol);
+  const history = await fetchHistory(selected.symbol, { forceRefresh });
   const chartData = buildPeriodData(history, selectedPeriod);
   const values = chartData.values;
 
@@ -781,11 +783,11 @@ async function saveManualPrice() {
       els.manualPriceSave.textContent = "저장";
       return;
     }
-    // 성공: 모달 닫고 live 가격 + 차트 리프레시
+    // 성공: 모달 닫고 live 가격 + 차트 리프레시 (CDN 캐시 우회)
     closeManualPriceModal();
     historyCache.delete(manualTargetSymbol);
     await loadLivePrices({ forceRefresh: true });
-    renderDetail();
+    await renderDetail({ forceRefresh: true });
   } catch (e) {
     showManualError("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
     els.manualPriceSave.disabled = false;
@@ -1654,7 +1656,10 @@ async function refreshPrices() {
   button.disabled = true;
   button.textContent = "갱신 중...";
   try {
+    // 전역 새로고침: 시세 + 현재 상세 차트 모두 CDN 캐시 우회
+    historyCache.clear();
     await loadLivePrices({ forceRefresh: true });
+    await renderDetail({ forceRefresh: true });
   } finally {
     button.disabled = false;
     button.textContent = originalText;
