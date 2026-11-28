@@ -635,7 +635,7 @@ let manualTargetSymbol = null;
 let manualTargetCurrent = null;
 
 // Ba 같은 isEstimate 종목이면 안내 바를 보여주고, 아니면 숨긴다.
-// collected_at 기준 경과일로 배지 색상·문구를 분기.
+// 분기 시작일(1/1, 3/1, 6/1, 9/1) 기준: 현재 분기 내 입력 있으면 정상, 아니면 "최신 갱신 필요".
 function renderManualNoticeBar(selected) {
   if (!els.manualNoticeBar) return;
 
@@ -644,21 +644,21 @@ function renderManualNoticeBar(selected) {
     return;
   }
 
-  // 마지막 갱신일 계산
   const lastIso = selected.collected_at || null;
   const daysAgo = lastIso ? daysSince(lastIso) : null;
 
-  // 배지 색상·문구
-  const badge = classifyManualAge(daysAgo);
+  // 분기 기준 배지 색상·문구
+  const badge = classifyManualAge(lastIso);
   els.manualNoticeBadge.textContent = badge.label;
   els.manualNoticeBadge.className = `manual-notice-badge ${badge.cls}`;
 
   // 안내 문구
+  const QUARTER_GUIDE = "1월1일, 3월1일, 6월1일, 9월1일에 1회 수작업 입력이 필요합니다.";
   if (lastIso) {
     const dateStr = new Date(lastIso).toISOString().slice(0, 10);
-    els.manualNoticeText.textContent = `마지막 갱신: ${dateStr} (${daysAgo}일 전) · 분기(90일)마다 갱신을 권장합니다.`;
+    els.manualNoticeText.textContent = `마지막 갱신: ${dateStr} (${daysAgo}일 전) · ${QUARTER_GUIDE}`;
   } else {
-    els.manualNoticeText.textContent = `아직 입력된 가격이 없습니다. "가격 갱신" 버튼으로 입력해 주세요.`;
+    els.manualNoticeText.textContent = QUARTER_GUIDE;
   }
 
   els.manualNoticeBar.hidden = false;
@@ -671,15 +671,32 @@ function daysSince(iso) {
   return Math.floor((Date.now() - t) / 86400000);
 }
 
-// 경과일 → 배지 분류
-// null(미입력): 빨강 "최초 갱신 필요"
-// 0~89: 녹색 "정상 갱신"
-// 90~179: 노랑 "갱신 권장 (분기 경과)"
-// 180+: 빨강 "업데이트 기간 초과 — 즉시 갱신 필요"
-function classifyManualAge(days) {
-  if (days == null) return { cls: "badge-red", label: "최초 갱신 필요" };
-  if (days >= 180) return { cls: "badge-red", label: "업데이트 기간 초과" };
-  if (days >= 90) return { cls: "badge-yellow", label: "갱신 권장" };
+// 오늘 기준 가장 최근 지나간 분기 시작일 (UTC). 분기 = 1/1, 3/1, 6/1, 9/1.
+// 예: 11/28 → 2026-09-01, 5/30 → 2026-03-01, 2/5 → 2026-01-01.
+function getLastQuarterStart() {
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth() + 1; // 1~12
+  const quarterMonths = [1, 3, 6, 9];
+  let lastQ = 1;
+  for (const q of quarterMonths) {
+    if (q <= month) lastQ = q;
+  }
+  return new Date(Date.UTC(year, lastQ - 1, 1));
+}
+
+// 분기 기준 배지 분류
+// 입력 없음(null) 또는 마지막 입력이 현재 분기 시작일 이전 → 빨강 "최신 갱신 필요"
+// 마지막 입력이 현재 분기 내 → 녹색 "정상 갱신"
+function classifyManualAge(lastIso) {
+  if (!lastIso) return { cls: "badge-red", label: "최신 갱신 필요" };
+  const lastInput = new Date(lastIso);
+  if (!Number.isFinite(lastInput.getTime())) {
+    return { cls: "badge-red", label: "최신 갱신 필요" };
+  }
+  if (lastInput < getLastQuarterStart()) {
+    return { cls: "badge-red", label: "최신 갱신 필요" };
+  }
   return { cls: "badge-green", label: "정상 갱신" };
 }
 
