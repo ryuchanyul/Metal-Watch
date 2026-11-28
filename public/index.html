@@ -131,6 +131,17 @@
                   <button class="active" data-period="1Y">1Y</button>
                 </div>
               </div>
+              <!-- 수동 입력 종목(예: Ba) 안내 바. renderDetail이 isEstimate 분기로 보이고 숨긴다 -->
+              <div id="manualNoticeBar" class="manual-notice-bar" hidden>
+                <div class="manual-notice-content">
+                  <span class="manual-notice-badge" id="manualNoticeBadge">정상 갱신</span>
+                  <span class="manual-notice-text" id="manualNoticeText">마지막 갱신: -</span>
+                </div>
+                <button id="manualUpdateBtn" class="manual-update-btn" type="button">
+                  <span aria-hidden="true">✏️</span>
+                  <span>가격 갱신</span>
+                </button>
+              </div>
               <div class="chart-box">
                 <svg id="yearChart" class="year-chart" viewBox="0 0 760 320" role="img" aria-label="연간 가격 차트"></svg>
                 <div id="chartTooltip" class="chart-tooltip" hidden></div>
@@ -370,6 +381,32 @@
     </div>
 
     <!-- 분석 저장 완료 모달 -->
+    <!-- 수동 가격 입력 모달 (Ba 등) -->
+    <div class="modal-overlay" id="manualPriceModal" role="dialog" aria-modal="true" aria-labelledby="manualPriceTitle" hidden>
+      <div class="modal-panel manual-price-panel" role="document">
+        <button class="modal-close" id="manualPriceClose" type="button" aria-label="모달 닫기">×</button>
+        <h2 class="modal-title" id="manualPriceTitle">가격 갱신</h2>
+        <div class="modal-body manual-price-body">
+          <dl class="manual-price-current">
+            <dt>현재값</dt>
+            <dd id="manualPriceCurrent">-</dd>
+          </dl>
+          <label class="manual-price-field">
+            <span>새 가격 (USD/kg)</span>
+            <input id="manualPriceInput" type="number" step="0.01" min="0" inputmode="decimal" autocomplete="off" />
+          </label>
+          <div class="manual-price-diff" id="manualPriceDiff" hidden>
+            변동: <span id="manualPriceDiffValue">-</span>
+          </div>
+          <div class="manual-price-error" id="manualPriceError" hidden></div>
+        </div>
+        <div class="modal-footer">
+          <button id="manualPriceCancel" class="modal-close-large" type="button">취소</button>
+          <button id="manualPriceSave" class="modal-save-large" type="button">저장</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-overlay" id="saveSuccessModal" role="dialog" aria-modal="true" aria-labelledby="saveSuccessTitle" hidden>
       <div class="modal-panel save-success-panel" role="document">
         <div class="save-success-icon" aria-hidden="true">✓</div>

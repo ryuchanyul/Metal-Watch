@@ -299,6 +299,20 @@ const els = {
   yearLow: document.querySelector("#yearLow"),
   yearAvg: document.querySelector("#yearAvg"),
   yearChart: document.querySelector("#yearChart"),
+  manualNoticeBar: document.querySelector("#manualNoticeBar"),
+  manualNoticeBadge: document.querySelector("#manualNoticeBadge"),
+  manualNoticeText: document.querySelector("#manualNoticeText"),
+  manualUpdateBtn: document.querySelector("#manualUpdateBtn"),
+  manualPriceModal: document.querySelector("#manualPriceModal"),
+  manualPriceClose: document.querySelector("#manualPriceClose"),
+  manualPriceCancel: document.querySelector("#manualPriceCancel"),
+  manualPriceSave: document.querySelector("#manualPriceSave"),
+  manualPriceTitle: document.querySelector("#manualPriceTitle"),
+  manualPriceCurrent: document.querySelector("#manualPriceCurrent"),
+  manualPriceInput: document.querySelector("#manualPriceInput"),
+  manualPriceDiff: document.querySelector("#manualPriceDiff"),
+  manualPriceDiffValue: document.querySelector("#manualPriceDiffValue"),
+  manualPriceError: document.querySelector("#manualPriceError"),
   chartTitle: document.querySelector("#chartTitle"),
   chartTooltip: document.querySelector("#chartTooltip"),
   prevMonthUsdHeader: document.querySelector("#prevMonthUsdHeader"),
@@ -572,6 +586,10 @@ async function renderDetail() {
 
   els.chartTitle.textContent = CHART_TITLE_MAP[selectedPeriod] || "차트";
 
+  // Ba 등 수동 입력 종목: 차트 위 안내 바 표시 + "가격 갱신" 버튼 활성화
+  // 자동 수집 종목은 안내 바 숨김 (hidden 유지)
+  renderManualNoticeBar(selected);
+
   const history = await fetchHistory(selected.symbol);
   const chartData = buildPeriodData(history, selectedPeriod);
   const values = chartData.values;
@@ -608,6 +626,158 @@ async function renderDetail() {
   }
 
   drawYearChart(chartData, avg);
+}
+
+// ────── 수동 입력 종목 (Ba 등) 안내 바 + 모달 ──────
+
+// 현재 "가격 갱신" 모달이 다루는 종목. openManualPriceModal에서 세팅.
+let manualTargetSymbol = null;
+let manualTargetCurrent = null;
+
+// Ba 같은 isEstimate 종목이면 안내 바를 보여주고, 아니면 숨긴다.
+// collected_at 기준 경과일로 배지 색상·문구를 분기.
+function renderManualNoticeBar(selected) {
+  if (!els.manualNoticeBar) return;
+
+  if (!selected || !selected.isEstimate) {
+    els.manualNoticeBar.hidden = true;
+    return;
+  }
+
+  // 마지막 갱신일 계산
+  const lastIso = selected.collected_at || null;
+  const daysAgo = lastIso ? daysSince(lastIso) : null;
+
+  // 배지 색상·문구
+  const badge = classifyManualAge(daysAgo);
+  els.manualNoticeBadge.textContent = badge.label;
+  els.manualNoticeBadge.className = `manual-notice-badge ${badge.cls}`;
+
+  // 안내 문구
+  if (lastIso) {
+    const dateStr = new Date(lastIso).toISOString().slice(0, 10);
+    els.manualNoticeText.textContent = `마지막 갱신: ${dateStr} (${daysAgo}일 전) · 분기(90일)마다 갱신을 권장합니다.`;
+  } else {
+    els.manualNoticeText.textContent = `아직 입력된 가격이 없습니다. "가격 갱신" 버튼으로 입력해 주세요.`;
+  }
+
+  els.manualNoticeBar.hidden = false;
+}
+
+// ISO 날짜 문자열을 받아 오늘 기준 경과 일수(정수) 반환. 실패 시 null.
+function daysSince(iso) {
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return null;
+  return Math.floor((Date.now() - t) / 86400000);
+}
+
+// 경과일 → 배지 분류
+// null(미입력): 빨강 "최초 갱신 필요"
+// 0~89: 녹색 "정상 갱신"
+// 90~179: 노랑 "갱신 권장 (분기 경과)"
+// 180+: 빨강 "업데이트 기간 초과 — 즉시 갱신 필요"
+function classifyManualAge(days) {
+  if (days == null) return { cls: "badge-red", label: "최초 갱신 필요" };
+  if (days >= 180) return { cls: "badge-red", label: "업데이트 기간 초과" };
+  if (days >= 90) return { cls: "badge-yellow", label: "갱신 권장" };
+  return { cls: "badge-green", label: "정상 갱신" };
+}
+
+// 모달 열기 — 상세 뷰의 "가격 갱신" 버튼에서 호출
+function openManualPriceModal() {
+  const selected = commodities.find((item) => item.symbol === selectedSymbol);
+  if (!selected || !selected.isEstimate) return;
+
+  manualTargetSymbol = selected.symbol;
+  manualTargetCurrent = Number.isFinite(Number(selected.usd)) ? Number(selected.usd) : null;
+
+  els.manualPriceTitle.textContent = `${selected.name} 가격 갱신`;
+  els.manualPriceCurrent.textContent =
+    manualTargetCurrent != null ? `$${manualTargetCurrent.toFixed(2)} / kg` : "입력된 값 없음";
+  els.manualPriceInput.value = "";
+  els.manualPriceDiff.hidden = true;
+  els.manualPriceError.hidden = true;
+  els.manualPriceError.textContent = "";
+  els.manualPriceSave.disabled = false;
+  els.manualPriceSave.textContent = "저장";
+
+  els.manualPriceModal.hidden = false;
+  els.manualPriceModal.classList.add("open");
+  setTimeout(() => els.manualPriceInput.focus(), 50);
+}
+
+function closeManualPriceModal() {
+  if (!els.manualPriceModal) return;
+  els.manualPriceModal.classList.remove("open");
+  els.manualPriceModal.hidden = true;
+  manualTargetSymbol = null;
+  manualTargetCurrent = null;
+}
+
+// 새 가격 입력 시 변동 미리보기 갱신
+function updateManualPriceDiff() {
+  const raw = els.manualPriceInput.value;
+  const newPrice = Number(raw);
+  if (!raw || !Number.isFinite(newPrice) || newPrice <= 0 || manualTargetCurrent == null) {
+    els.manualPriceDiff.hidden = true;
+    return;
+  }
+  const diff = newPrice - manualTargetCurrent;
+  const pct = (diff / manualTargetCurrent) * 100;
+  const sign = diff >= 0 ? "+" : "";
+  els.manualPriceDiffValue.textContent =
+    `${sign}$${diff.toFixed(2)} (${sign}${pct.toFixed(1)}%)`;
+  // 큰 변동은 색상 경고
+  const extreme = Math.abs(pct) >= 30;
+  els.manualPriceDiff.className = `manual-price-diff ${extreme ? "warn" : ""}`;
+  els.manualPriceDiff.hidden = false;
+}
+
+// 저장 — POST /api/manual/update
+async function saveManualPrice() {
+  const raw = els.manualPriceInput.value;
+  const newPrice = Number(raw);
+  if (!raw || !Number.isFinite(newPrice) || newPrice <= 0) {
+    showManualError("유효한 가격을 입력해 주세요.");
+    return;
+  }
+
+  els.manualPriceSave.disabled = true;
+  els.manualPriceSave.textContent = "저장 중…";
+  hideManualError();
+
+  try {
+    const res = await fetch("/api/manual/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ symbol: manualTargetSymbol, usd_per_kg: newPrice })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      showManualError(data.error || `저장 실패 (${res.status})`);
+      els.manualPriceSave.disabled = false;
+      els.manualPriceSave.textContent = "저장";
+      return;
+    }
+    // 성공: 모달 닫고 live 가격 + 차트 리프레시
+    closeManualPriceModal();
+    historyCache.delete(manualTargetSymbol);
+    await loadLivePrices({ forceRefresh: true });
+    renderDetail();
+  } catch (e) {
+    showManualError("네트워크 오류가 발생했습니다. 다시 시도해 주세요.");
+    els.manualPriceSave.disabled = false;
+    els.manualPriceSave.textContent = "저장";
+  }
+}
+
+function showManualError(msg) {
+  els.manualPriceError.textContent = msg;
+  els.manualPriceError.hidden = false;
+}
+function hideManualError() {
+  els.manualPriceError.hidden = true;
+  els.manualPriceError.textContent = "";
 }
 
 // 수집 시각(ISO 문자열)을 "M/D" 형식으로 반환. 값이 없으면 빈 문자열.
@@ -1496,6 +1666,26 @@ document.querySelectorAll(".period-tabs button").forEach((button) => {
     renderDetail();
   });
 });
+
+// 수동 가격 입력 모달 이벤트
+if (els.manualUpdateBtn) {
+  els.manualUpdateBtn.addEventListener("click", openManualPriceModal);
+}
+if (els.manualPriceClose) els.manualPriceClose.addEventListener("click", closeManualPriceModal);
+if (els.manualPriceCancel) els.manualPriceCancel.addEventListener("click", closeManualPriceModal);
+if (els.manualPriceSave) els.manualPriceSave.addEventListener("click", saveManualPrice);
+if (els.manualPriceInput) {
+  els.manualPriceInput.addEventListener("input", updateManualPriceDiff);
+  els.manualPriceInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") saveManualPrice();
+    if (e.key === "Escape") closeManualPriceModal();
+  });
+}
+if (els.manualPriceModal) {
+  els.manualPriceModal.addEventListener("click", (e) => {
+    if (e.target === els.manualPriceModal) closeManualPriceModal();
+  });
+}
 
 // 분석표 탭 — 이벤트 바인딩
 els.analysisFile.addEventListener("change", () => {

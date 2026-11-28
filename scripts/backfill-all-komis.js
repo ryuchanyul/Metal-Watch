@@ -40,7 +40,8 @@ const SANITY_RANGE = {
   Pd:    [15000, 150000],  // 팔라듐
   Mg:    [1, 30],       // 마그네슘
   Ti:    [3, 100],      // 티타늄
-  In:    [100, 2000]    // 인듐
+  In:    [100, 2000],   // 인듐
+  Ba:    [5, 50]        // 바륨 — 수동 입력 전용 (api/manual/update.js에서도 동일 범위 사용)
 };
 
 async function sendSanityAlert(symbol, median, range) {

@@ -2766,3 +2766,173 @@ body.focus-mode #prices #refreshPrices {
   width: auto !important;
   justify-content: center !important;
 }
+
+/* ────── 수동 입력 안내 바 (Ba 등) ────── */
+.manual-notice-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+}
+.manual-notice-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.manual-notice-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.manual-notice-badge.badge-green {
+  background: #d1fae5;
+  color: #065f46;
+}
+.manual-notice-badge.badge-yellow {
+  background: #fef3c7;
+  color: #92400e;
+}
+.manual-notice-badge.badge-red {
+  background: #fee2e2;
+  color: #991b1b;
+  animation: pulse-red 2s ease-in-out infinite;
+}
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.manual-notice-text {
+  color: #475569;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.manual-update-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #0f172a;
+  background: #0f172a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.manual-update-btn:hover {
+  background: #1e293b;
+}
+
+/* ────── 수동 가격 입력 모달 ────── */
+.manual-price-panel {
+  max-width: 420px;
+}
+.manual-price-body {
+  padding: 8px 4px 4px;
+}
+.manual-price-current {
+  margin: 0 0 20px;
+  padding: 12px 14px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 8px;
+  align-items: baseline;
+}
+.manual-price-current dt {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0;
+}
+.manual-price-current dd {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+.manual-price-field {
+  display: block;
+  margin-bottom: 14px;
+}
+.manual-price-field span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.manual-price-field input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 18px;
+  font-weight: 600;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+.manual-price-field input:focus {
+  border-color: #0f172a;
+}
+.manual-price-diff {
+  padding: 10px 12px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #065f46;
+  margin-bottom: 10px;
+}
+.manual-price-diff.warn {
+  background: #fef3c7;
+  border-color: #fcd34d;
+  color: #92400e;
+}
+.manual-price-diff #manualPriceDiffValue {
+  font-weight: 700;
+  font-size: 14px;
+}
+.manual-price-error {
+  padding: 10px 12px;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #991b1b;
+  margin-bottom: 10px;
+}
+.modal-save-large {
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: 1px solid #0f172a;
+  background: #0f172a;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.modal-save-large:hover:not(:disabled) {
+  background: #1e293b;
+}
+.modal-save-large:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
